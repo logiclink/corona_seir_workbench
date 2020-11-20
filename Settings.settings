@@ -1,0 +1,428 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LogicLink.Corona" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Population" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">83132799</Value>
+    </Setting>
+    <Setting Name="Infectious" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="IncubationPeriod" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">5.04:48:00</Value>
+    </Setting>
+    <Setting Name="InfectiousPeriod" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">2.21:36:00</Value>
+    </Setting>
+    <Setting Name="Reproduction" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">3.4</Value>
+    </Setting>
+    <Setting Name="Start" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2020-01-27</Value>
+    </Setting>
+    <Setting Name="End" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2020-12-31</Value>
+    </Setting>
+    <Setting Name="Country" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Germany</Value>
+    </Setting>
+    <Setting Name="Countries" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Afghanistan&lt;/string&gt;
+  &lt;string&gt;Albania&lt;/string&gt;
+  &lt;string&gt;Algeria&lt;/string&gt;
+  &lt;string&gt;Andorra&lt;/string&gt;
+  &lt;string&gt;Angola&lt;/string&gt;
+  &lt;string&gt;Antigua and Barbuda&lt;/string&gt;
+  &lt;string&gt;Argentina&lt;/string&gt;
+  &lt;string&gt;Armenia&lt;/string&gt;
+  &lt;string&gt;Australia&lt;/string&gt;
+  &lt;string&gt;Austria&lt;/string&gt;
+  &lt;string&gt;Azerbaijan&lt;/string&gt;
+  &lt;string&gt;Bahamas&lt;/string&gt;
+  &lt;string&gt;Bahrain&lt;/string&gt;
+  &lt;string&gt;Bangladesh&lt;/string&gt;
+  &lt;string&gt;Barbados&lt;/string&gt;
+  &lt;string&gt;Belarus&lt;/string&gt;
+  &lt;string&gt;Belgium&lt;/string&gt;
+  &lt;string&gt;Belize&lt;/string&gt;
+  &lt;string&gt;Benin&lt;/string&gt;
+  &lt;string&gt;Bhutan&lt;/string&gt;
+  &lt;string&gt;Bolivia&lt;/string&gt;
+  &lt;string&gt;Bosnia and Herzegovina&lt;/string&gt;
+  &lt;string&gt;Botswana&lt;/string&gt;
+  &lt;string&gt;Brazil&lt;/string&gt;
+  &lt;string&gt;Brunei&lt;/string&gt;
+  &lt;string&gt;Bulgaria&lt;/string&gt;
+  &lt;string&gt;Burkina Faso&lt;/string&gt;
+  &lt;string&gt;Burma&lt;/string&gt;
+  &lt;string&gt;Burundi&lt;/string&gt;
+  &lt;string&gt;Cabo Verde&lt;/string&gt;
+  &lt;string&gt;Cambodia&lt;/string&gt;
+  &lt;string&gt;Cameroon&lt;/string&gt;
+  &lt;string&gt;Canada&lt;/string&gt;
+  &lt;string&gt;Central African Republic&lt;/string&gt;
+  &lt;string&gt;Chad&lt;/string&gt;
+  &lt;string&gt;Chile&lt;/string&gt;
+  &lt;string&gt;China&lt;/string&gt;
+  &lt;string&gt;Colombia&lt;/string&gt;
+  &lt;string&gt;Comoros&lt;/string&gt;
+  &lt;string&gt;Congo (Brazzaville)&lt;/string&gt;
+  &lt;string&gt;Congo (Kinshasa)&lt;/string&gt;
+  &lt;string&gt;Costa Rica&lt;/string&gt;
+  &lt;string&gt;Cote d'Ivoire&lt;/string&gt;
+  &lt;string&gt;Croatia&lt;/string&gt;
+  &lt;string&gt;Cuba&lt;/string&gt;
+  &lt;string&gt;Cyprus&lt;/string&gt;
+  &lt;string&gt;Czechia&lt;/string&gt;
+  &lt;string&gt;Denmark&lt;/string&gt;
+  &lt;string&gt;Diamond Princess&lt;/string&gt;
+  &lt;string&gt;Djibouti&lt;/string&gt;
+  &lt;string&gt;Dominica&lt;/string&gt;
+  &lt;string&gt;Dominican Republic&lt;/string&gt;
+  &lt;string&gt;Ecuador&lt;/string&gt;
+  &lt;string&gt;Egypt&lt;/string&gt;
+  &lt;string&gt;El Salvador&lt;/string&gt;
+  &lt;string&gt;Equatorial Guinea&lt;/string&gt;
+  &lt;string&gt;Eritrea&lt;/string&gt;
+  &lt;string&gt;Estonia&lt;/string&gt;
+  &lt;string&gt;Eswatini&lt;/string&gt;
+  &lt;string&gt;Ethiopia&lt;/string&gt;
+  &lt;string&gt;Fiji&lt;/string&gt;
+  &lt;string&gt;Finland&lt;/string&gt;
+  &lt;string&gt;France&lt;/string&gt;
+  &lt;string&gt;Gabon&lt;/string&gt;
+  &lt;string&gt;Gambia&lt;/string&gt;
+  &lt;string&gt;Georgia&lt;/string&gt;
+  &lt;string&gt;Germany&lt;/string&gt;
+  &lt;string&gt;Ghana&lt;/string&gt;
+  &lt;string&gt;Greece&lt;/string&gt;
+  &lt;string&gt;Grenada&lt;/string&gt;
+  &lt;string&gt;Guatemala&lt;/string&gt;
+  &lt;string&gt;Guinea&lt;/string&gt;
+  &lt;string&gt;Guinea-Bissau&lt;/string&gt;
+  &lt;string&gt;Guyana&lt;/string&gt;
+  &lt;string&gt;Haiti&lt;/string&gt;
+  &lt;string&gt;Holy See&lt;/string&gt;
+  &lt;string&gt;Honduras&lt;/string&gt;
+  &lt;string&gt;Hungary&lt;/string&gt;
+  &lt;string&gt;Iceland&lt;/string&gt;
+  &lt;string&gt;India&lt;/string&gt;
+  &lt;string&gt;Indonesia&lt;/string&gt;
+  &lt;string&gt;Iran&lt;/string&gt;
+  &lt;string&gt;Iraq&lt;/string&gt;
+  &lt;string&gt;Ireland&lt;/string&gt;
+  &lt;string&gt;Israel&lt;/string&gt;
+  &lt;string&gt;Italy&lt;/string&gt;
+  &lt;string&gt;Jamaica&lt;/string&gt;
+  &lt;string&gt;Japan&lt;/string&gt;
+  &lt;string&gt;Jordan&lt;/string&gt;
+  &lt;string&gt;Kazakhstan&lt;/string&gt;
+  &lt;string&gt;Kenya&lt;/string&gt;
+  &lt;string&gt;Korea, South&lt;/string&gt;
+  &lt;string&gt;Kosovo&lt;/string&gt;
+  &lt;string&gt;Kuwait&lt;/string&gt;
+  &lt;string&gt;Kyrgyzstan&lt;/string&gt;
+  &lt;string&gt;Laos&lt;/string&gt;
+  &lt;string&gt;Latvia&lt;/string&gt;
+  &lt;string&gt;Lebanon&lt;/string&gt;
+  &lt;string&gt;Lesotho&lt;/string&gt;
+  &lt;string&gt;Liberia&lt;/string&gt;
+  &lt;string&gt;Libya&lt;/string&gt;
+  &lt;string&gt;Liechtenstein&lt;/string&gt;
+  &lt;string&gt;Lithuania&lt;/string&gt;
+  &lt;string&gt;Luxembourg&lt;/string&gt;
+  &lt;string&gt;MS Zaandam&lt;/string&gt;
+  &lt;string&gt;Madagascar&lt;/string&gt;
+  &lt;string&gt;Malawi&lt;/string&gt;
+  &lt;string&gt;Malaysia&lt;/string&gt;
+  &lt;string&gt;Maldives&lt;/string&gt;
+  &lt;string&gt;Mali&lt;/string&gt;
+  &lt;string&gt;Malta&lt;/string&gt;
+  &lt;string&gt;Mauritania&lt;/string&gt;
+  &lt;string&gt;Mauritius&lt;/string&gt;
+  &lt;string&gt;Mexico&lt;/string&gt;
+  &lt;string&gt;Moldova&lt;/string&gt;
+  &lt;string&gt;Monaco&lt;/string&gt;
+  &lt;string&gt;Mongolia&lt;/string&gt;
+  &lt;string&gt;Montenegro&lt;/string&gt;
+  &lt;string&gt;Morocco&lt;/string&gt;
+  &lt;string&gt;Mozambique&lt;/string&gt;
+  &lt;string&gt;Namibia&lt;/string&gt;
+  &lt;string&gt;Nepal&lt;/string&gt;
+  &lt;string&gt;Netherlands&lt;/string&gt;
+  &lt;string&gt;New Zealand&lt;/string&gt;
+  &lt;string&gt;Nicaragua&lt;/string&gt;
+  &lt;string&gt;Niger&lt;/string&gt;
+  &lt;string&gt;Nigeria&lt;/string&gt;
+  &lt;string&gt;North Macedonia&lt;/string&gt;
+  &lt;string&gt;Norway&lt;/string&gt;
+  &lt;string&gt;Oman&lt;/string&gt;
+  &lt;string&gt;Pakistan&lt;/string&gt;
+  &lt;string&gt;Panama&lt;/string&gt;
+  &lt;string&gt;Papua New Guinea&lt;/string&gt;
+  &lt;string&gt;Paraguay&lt;/string&gt;
+  &lt;string&gt;Peru&lt;/string&gt;
+  &lt;string&gt;Philippines&lt;/string&gt;
+  &lt;string&gt;Poland&lt;/string&gt;
+  &lt;string&gt;Portugal&lt;/string&gt;
+  &lt;string&gt;Qatar&lt;/string&gt;
+  &lt;string&gt;Romania&lt;/string&gt;
+  &lt;string&gt;Russia&lt;/string&gt;
+  &lt;string&gt;Rwanda&lt;/string&gt;
+  &lt;string&gt;Saint Kitts and Nevis&lt;/string&gt;
+  &lt;string&gt;Saint Lucia&lt;/string&gt;
+  &lt;string&gt;Saint Vincent and the Grenadines&lt;/string&gt;
+  &lt;string&gt;San Marino&lt;/string&gt;
+  &lt;string&gt;Sao Tome and Principe&lt;/string&gt;
+  &lt;string&gt;Saudi Arabia&lt;/string&gt;
+  &lt;string&gt;Senegal&lt;/string&gt;
+  &lt;string&gt;Serbia&lt;/string&gt;
+  &lt;string&gt;Seychelles&lt;/string&gt;
+  &lt;string&gt;Sierra Leone&lt;/string&gt;
+  &lt;string&gt;Singapore&lt;/string&gt;
+  &lt;string&gt;Slovakia&lt;/string&gt;
+  &lt;string&gt;Slovenia&lt;/string&gt;
+  &lt;string&gt;Somalia&lt;/string&gt;
+  &lt;string&gt;South Africa&lt;/string&gt;
+  &lt;string&gt;South Sudan&lt;/string&gt;
+  &lt;string&gt;Spain&lt;/string&gt;
+  &lt;string&gt;Sri Lanka&lt;/string&gt;
+  &lt;string&gt;Sudan&lt;/string&gt;
+  &lt;string&gt;Suriname&lt;/string&gt;
+  &lt;string&gt;Sweden&lt;/string&gt;
+  &lt;string&gt;Switzerland&lt;/string&gt;
+  &lt;string&gt;Syria&lt;/string&gt;
+  &lt;string&gt;Taiwan*&lt;/string&gt;
+  &lt;string&gt;Tajikistan&lt;/string&gt;
+  &lt;string&gt;Tanzania&lt;/string&gt;
+  &lt;string&gt;Thailand&lt;/string&gt;
+  &lt;string&gt;Timor-Leste&lt;/string&gt;
+  &lt;string&gt;Togo&lt;/string&gt;
+  &lt;string&gt;Trinidad and Tobago&lt;/string&gt;
+  &lt;string&gt;Tunisia&lt;/string&gt;
+  &lt;string&gt;Turkey&lt;/string&gt;
+  &lt;string&gt;US&lt;/string&gt;
+  &lt;string&gt;Uganda&lt;/string&gt;
+  &lt;string&gt;Ukraine&lt;/string&gt;
+  &lt;string&gt;United Arab Emirates&lt;/string&gt;
+  &lt;string&gt;United Kingdom&lt;/string&gt;
+  &lt;string&gt;Uruguay&lt;/string&gt;
+  &lt;string&gt;Uzbekistan&lt;/string&gt;
+  &lt;string&gt;Venezuela&lt;/string&gt;
+  &lt;string&gt;Vietnam&lt;/string&gt;
+  &lt;string&gt;West Bank and Gaza&lt;/string&gt;
+  &lt;string&gt;Western Sahara&lt;/string&gt;
+  &lt;string&gt;Yemen&lt;/string&gt;
+  &lt;string&gt;Zambia&lt;/string&gt;
+  &lt;string&gt;Zimbabwe&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="Show" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">131071</Value>
+    </Setting>
+    <Setting Name="CountriesISO3" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;AFG&lt;/string&gt;
+  &lt;string&gt;ALB&lt;/string&gt;
+  &lt;string&gt;DZA&lt;/string&gt;
+  &lt;string&gt;AND&lt;/string&gt;
+  &lt;string&gt;AGO&lt;/string&gt;
+  &lt;string&gt;ATG&lt;/string&gt;
+  &lt;string&gt;ARG&lt;/string&gt;
+  &lt;string&gt;ARM&lt;/string&gt;
+  &lt;string&gt;AUS&lt;/string&gt;
+  &lt;string&gt;AUT&lt;/string&gt;
+  &lt;string&gt;AZE&lt;/string&gt;
+  &lt;string&gt;BHS&lt;/string&gt;
+  &lt;string&gt;BHR&lt;/string&gt;
+  &lt;string&gt;BGD&lt;/string&gt;
+  &lt;string&gt;BRB&lt;/string&gt;
+  &lt;string&gt;BLR&lt;/string&gt;
+  &lt;string&gt;BEL&lt;/string&gt;
+  &lt;string&gt;BLZ&lt;/string&gt;
+  &lt;string&gt;BEN&lt;/string&gt;
+  &lt;string&gt;BTN&lt;/string&gt;
+  &lt;string&gt;BOL&lt;/string&gt;
+  &lt;string&gt;BIH&lt;/string&gt;
+  &lt;string&gt;BWA&lt;/string&gt;
+  &lt;string&gt;BRA&lt;/string&gt;
+  &lt;string&gt;BRN&lt;/string&gt;
+  &lt;string&gt;BGR&lt;/string&gt;
+  &lt;string&gt;BFA&lt;/string&gt;
+  &lt;string&gt;MMR&lt;/string&gt;
+  &lt;string&gt;BDI&lt;/string&gt;
+  &lt;string&gt;CPV&lt;/string&gt;
+  &lt;string&gt;KHM&lt;/string&gt;
+  &lt;string&gt;CMR&lt;/string&gt;
+  &lt;string&gt;CAN&lt;/string&gt;
+  &lt;string&gt;CYM&lt;/string&gt;
+  &lt;string&gt;TCD&lt;/string&gt;
+  &lt;string&gt;CHL&lt;/string&gt;
+  &lt;string&gt;CHN&lt;/string&gt;
+  &lt;string&gt;COL&lt;/string&gt;
+  &lt;string&gt;COM&lt;/string&gt;
+  &lt;string&gt;COG&lt;/string&gt;
+  &lt;string&gt;COD&lt;/string&gt;
+  &lt;string&gt;CRI&lt;/string&gt;
+  &lt;string&gt;CIV&lt;/string&gt;
+  &lt;string&gt;HRV&lt;/string&gt;
+  &lt;string&gt;CUB&lt;/string&gt;
+  &lt;string&gt;CYP&lt;/string&gt;
+  &lt;string&gt;CZE&lt;/string&gt;
+  &lt;string&gt;DNK&lt;/string&gt;
+  &lt;string&gt;MSD&lt;/string&gt;
+  &lt;string&gt;DJI&lt;/string&gt;
+  &lt;string&gt;DMA&lt;/string&gt;
+  &lt;string&gt;DOM&lt;/string&gt;
+  &lt;string&gt;ECU&lt;/string&gt;
+  &lt;string&gt;EGY&lt;/string&gt;
+  &lt;string&gt;SLV&lt;/string&gt;
+  &lt;string&gt;GNQ&lt;/string&gt;
+  &lt;string&gt;ERI&lt;/string&gt;
+  &lt;string&gt;EST&lt;/string&gt;
+  &lt;string&gt;SWZ&lt;/string&gt;
+  &lt;string&gt;ETH&lt;/string&gt;
+  &lt;string&gt;FJI&lt;/string&gt;
+  &lt;string&gt;FIN&lt;/string&gt;
+  &lt;string&gt;FRA&lt;/string&gt;
+  &lt;string&gt;GAB&lt;/string&gt;
+  &lt;string&gt;GMB&lt;/string&gt;
+  &lt;string&gt;GEO&lt;/string&gt;
+  &lt;string&gt;DEU&lt;/string&gt;
+  &lt;string&gt;GHA&lt;/string&gt;
+  &lt;string&gt;GRC&lt;/string&gt;
+  &lt;string&gt;GRD&lt;/string&gt;
+  &lt;string&gt;GTM&lt;/string&gt;
+  &lt;string&gt;GIN&lt;/string&gt;
+  &lt;string&gt;GNB&lt;/string&gt;
+  &lt;string&gt;GUY&lt;/string&gt;
+  &lt;string&gt;HTI&lt;/string&gt;
+  &lt;string&gt;VAT&lt;/string&gt;
+  &lt;string&gt;HND&lt;/string&gt;
+  &lt;string&gt;HUN&lt;/string&gt;
+  &lt;string&gt;ISL&lt;/string&gt;
+  &lt;string&gt;IND&lt;/string&gt;
+  &lt;string&gt;IDN&lt;/string&gt;
+  &lt;string&gt;IRN&lt;/string&gt;
+  &lt;string&gt;IRQ&lt;/string&gt;
+  &lt;string&gt;IRL&lt;/string&gt;
+  &lt;string&gt;ISR&lt;/string&gt;
+  &lt;string&gt;ITA&lt;/string&gt;
+  &lt;string&gt;JAM&lt;/string&gt;
+  &lt;string&gt;JPN&lt;/string&gt;
+  &lt;string&gt;JOR&lt;/string&gt;
+  &lt;string&gt;KAZ&lt;/string&gt;
+  &lt;string&gt;KEN&lt;/string&gt;
+  &lt;string&gt;PRK&lt;/string&gt;
+  &lt;string&gt;KOR&lt;/string&gt;
+  &lt;string&gt;KWT&lt;/string&gt;
+  &lt;string&gt;KGZ&lt;/string&gt;
+  &lt;string&gt;LAO&lt;/string&gt;
+  &lt;string&gt;LVA&lt;/string&gt;
+  &lt;string&gt;LBN&lt;/string&gt;
+  &lt;string&gt;LSO&lt;/string&gt;
+  &lt;string&gt;LBR&lt;/string&gt;
+  &lt;string&gt;LBY&lt;/string&gt;
+  &lt;string&gt;LIE&lt;/string&gt;
+  &lt;string&gt;LTU&lt;/string&gt;
+  &lt;string&gt;LUX&lt;/string&gt;
+  &lt;string&gt;MSZ&lt;/string&gt;
+  &lt;string&gt;MDG&lt;/string&gt;
+  &lt;string&gt;MWI&lt;/string&gt;
+  &lt;string&gt;MYS&lt;/string&gt;
+  &lt;string&gt;MDV&lt;/string&gt;
+  &lt;string&gt;MLI&lt;/string&gt;
+  &lt;string&gt;MLT&lt;/string&gt;
+  &lt;string&gt;MRT&lt;/string&gt;
+  &lt;string&gt;MUS&lt;/string&gt;
+  &lt;string&gt;MEX&lt;/string&gt;
+  &lt;string&gt;MDA&lt;/string&gt;
+  &lt;string&gt;MCO&lt;/string&gt;
+  &lt;string&gt;MNG&lt;/string&gt;
+  &lt;string&gt;MNE&lt;/string&gt;
+  &lt;string&gt;MAR&lt;/string&gt;
+  &lt;string&gt;MOZ&lt;/string&gt;
+  &lt;string&gt;NAM&lt;/string&gt;
+  &lt;string&gt;NPL&lt;/string&gt;
+  &lt;string&gt;NLD&lt;/string&gt;
+  &lt;string&gt;NZL&lt;/string&gt;
+  &lt;string&gt;NIC&lt;/string&gt;
+  &lt;string&gt;NER&lt;/string&gt;
+  &lt;string&gt;NGA&lt;/string&gt;
+  &lt;string&gt;MKD&lt;/string&gt;
+  &lt;string&gt;NOR&lt;/string&gt;
+  &lt;string&gt;OMN&lt;/string&gt;
+  &lt;string&gt;PAK&lt;/string&gt;
+  &lt;string&gt;PAN&lt;/string&gt;
+  &lt;string&gt;PNG&lt;/string&gt;
+  &lt;string&gt;PRY&lt;/string&gt;
+  &lt;string&gt;PER&lt;/string&gt;
+  &lt;string&gt;PHL&lt;/string&gt;
+  &lt;string&gt;POL&lt;/string&gt;
+  &lt;string&gt;PRT&lt;/string&gt;
+  &lt;string&gt;QAT&lt;/string&gt;
+  &lt;string&gt;ROU&lt;/string&gt;
+  &lt;string&gt;RUS&lt;/string&gt;
+  &lt;string&gt;RWA&lt;/string&gt;
+  &lt;string&gt;KNA&lt;/string&gt;
+  &lt;string&gt;LCA&lt;/string&gt;
+  &lt;string&gt;VCT&lt;/string&gt;
+  &lt;string&gt;SMR&lt;/string&gt;
+  &lt;string&gt;STP&lt;/string&gt;
+  &lt;string&gt;SAU&lt;/string&gt;
+  &lt;string&gt;SEN&lt;/string&gt;
+  &lt;string&gt;SRB&lt;/string&gt;
+  &lt;string&gt;SYC&lt;/string&gt;
+  &lt;string&gt;SLE&lt;/string&gt;
+  &lt;string&gt;SGP&lt;/string&gt;
+  &lt;string&gt;SVK&lt;/string&gt;
+  &lt;string&gt;SVN&lt;/string&gt;
+  &lt;string&gt;SOM&lt;/string&gt;
+  &lt;string&gt;ZAF&lt;/string&gt;
+  &lt;string&gt;SSD&lt;/string&gt;
+  &lt;string&gt;ESP&lt;/string&gt;
+  &lt;string&gt;LKA&lt;/string&gt;
+  &lt;string&gt;SDN&lt;/string&gt;
+  &lt;string&gt;SUR&lt;/string&gt;
+  &lt;string&gt;SWE&lt;/string&gt;
+  &lt;string&gt;CHE&lt;/string&gt;
+  &lt;string&gt;SYR&lt;/string&gt;
+  &lt;string&gt;TWN&lt;/string&gt;
+  &lt;string&gt;TJK&lt;/string&gt;
+  &lt;string&gt;TZA&lt;/string&gt;
+  &lt;string&gt;THA&lt;/string&gt;
+  &lt;string&gt;TLS&lt;/string&gt;
+  &lt;string&gt;TGO&lt;/string&gt;
+  &lt;string&gt;TTO&lt;/string&gt;
+  &lt;string&gt;TUN&lt;/string&gt;
+  &lt;string&gt;TUR&lt;/string&gt;
+  &lt;string&gt;USA&lt;/string&gt;
+  &lt;string&gt;UGA&lt;/string&gt;
+  &lt;string&gt;UKR&lt;/string&gt;
+  &lt;string&gt;ARE&lt;/string&gt;
+  &lt;string&gt;GBR&lt;/string&gt;
+  &lt;string&gt;URY&lt;/string&gt;
+  &lt;string&gt;UZB&lt;/string&gt;
+  &lt;string&gt;VEN&lt;/string&gt;
+  &lt;string&gt;VNM&lt;/string&gt;
+  &lt;string&gt;PSE&lt;/string&gt;
+  &lt;string&gt;ESH&lt;/string&gt;
+  &lt;string&gt;YEM&lt;/string&gt;
+  &lt;string&gt;ZMB&lt;/string&gt;
+  &lt;string&gt;ZWE&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="Solve" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="SolveR0ResidualDayWindow" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="SolveR0IntervalDays" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Corona</AssemblyName>
+    <RootNamespace>LogicLink.Corona</RootNamespace>
+    <ApplicationIcon>Corona.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Dokumentation\**" />
+    <Compile Remove="Graphik\**" />
+    <Compile Remove="images\**" />
+    <Compile Remove="Infos\**" />
+    <Compile Remove="Unbenutzt\**" />
+    <Compile Remove="Version*\**" />
+    <EmbeddedResource Remove="Dokumentation\**" />
+    <EmbeddedResource Remove="Graphik\**" />
+    <EmbeddedResource Remove="images\**" />
+    <EmbeddedResource Remove="Infos\**" />
+    <EmbeddedResource Remove="Unbenutzt\**" />
+    <EmbeddedResource Remove="Version*\**" />
+    <None Remove="Dokumentation\**" />
+    <None Remove="Graphik\**" />
+    <None Remove="images\**" />
+    <None Remove="Infos\**" />
+    <None Remove="Unbenutzt\**" />
+    <None Remove="Version*\**" />
+    <Page Remove="Dokumentation\**" />
+    <Page Remove="Graphik\**" />
+    <Page Remove="images\**" />
+    <Page Remove="Infos\**" />
+    <Page Remove="Unbenutzt\**" />
+    <Page Remove="Version*\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Corona.ico" />
+    <None Remove="CSCorona.fsy" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Corona.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

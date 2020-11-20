@@ -1,0 +1,33 @@
+﻿<Window x:Class="LogicLink.Corona.Data"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LogicLink.Corona"
+        mc:Ignorable="d"
+        Title="Corona SEIR Workbench - Data" 
+        Height="450" Width="800">
+    <Grid>
+        <DataGrid ItemsSource="{Binding }"
+                  IsReadOnly="True"
+                  ClipboardCopyMode="IncludeHeader"
+                  CanUserResizeRows="False"
+                  RowHeaderWidth ="21"
+                  MinRowHeight="21"
+                  HorizontalGridLinesBrush ="#FFEEECE1"
+                  VerticalGridLinesBrush ="#FFEEECE1"
+                  AlternatingRowBackground="#FFF2F2F2"
+                  >
+            <DataGrid.Resources>
+                
+                <!--  Access 2010 hellblauer Hintergrund mit schwarzer Schrift  -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FFB7DBFF"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+
+                <!--  Randfarbe der ausgewählten Zelle  -->
+                <SolidColorBrush x:Key="{x:Static DataGrid.FocusBorderBrushKey}" Color="#FFF1D14D"/>
+                
+            </DataGrid.Resources>
+        </DataGrid>
+    </Grid>
+</Window>

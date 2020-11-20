@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="LogicLink.Corona.SEIR">
+    <Position X="0.5" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAIAAABEREAI0ACgABAABABAAAAAAAAAAEAAA=</HashCode>
+      <FileName>SEIR.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.SEIRSeriesView">
+    <Position X="3.5" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAACAICAABAAAAAgAAIAAAAAAAAEAKEAAAAIAAA=</HashCode>
+      <FileName>SEIRSeriesView.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.SEIRDateSeriesView">
+    <Position X="6.25" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAgAQAACAICAABAAAAAgAAIAAAAAAAAEAKEAAAAIAAA=</HashCode>
+      <FileName>SEIRDateSeriesView.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.SEIRR0DateSeriesView">
+    <Position X="9" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAgAQAACAICAABAAAAAgQAIAAAAAAAAEAKEAAAAIAAA=</HashCode>
+      <FileName>SEIRR0DateSeriesView.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.JHU">
+    <Position X="0.5" Y="9.75" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="LogicLink.Corona.JHU.Record" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>JHU.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAQAAAgAAAQAgAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>JHU.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LogicLink.Corona.JHUDateSeriesView">
+    <Position X="3.5" Y="9.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAEAABAABAAAAAAAAABAAAAAAAEACEAAEAEAAQ=</HashCode>
+      <FileName>JHUDateSeriesView.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.RKINowcasting">
+    <Position X="0.5" Y="14" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Struct Name="LogicLink.Corona.RKINowcasting.Record" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>RKINowcasting.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RKINowcasting.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LogicLink.Corona.RKINowcastingDateSeriesView">
+    <Position X="3.5" Y="14" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAQAAAAABAAAAAAAAAAAAAAAAAEACEAAAAAAAA=</HashCode>
+      <FileName>RKINowcastingDateSeriesView.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.SEIRR0Solver">
+    <Position X="14.75" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAQAAAAAAAAAAAIAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>SEIRR0Solver.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="LogicLink.Corona.SEIRR0IntervalSolver">
+    <Position X="12" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAQAAAAAAAAAAAIAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>SEIRR0IntervallSolver.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="LogicLink.Corona.ISEIR">
+    <Position X="0.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAIAAAAEQAAIQACAABAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>ISEIR.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="LogicLink.Corona.ISeriesView">
+    <Position X="3.5" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>ISeriesView.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="LogicLink.Corona.IDateSeriesView">
+    <Position X="6.25" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>IDateSeriesView.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="LogicLink.Corona.IR0Solver">
+    <Position X="12" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IR0Solver.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="SEIR delta Susceptible.svg"
+   id="svg39"
+   version="1.1"
+   overflow="hidden"
+   height="59.112305"
+   width="171.96123">
+  <metadata
+     id="metadata43">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="svg39"
+     inkscape:window-maximized="1"
+     inkscape:window-y="-11"
+     inkscape:window-x="-11"
+     inkscape:cy="-4.8164063"
+     inkscape:cx="566.32845"
+     inkscape:zoom="0.996875"
+     fit-margin-bottom="0"
+     fit-margin-right="0"
+     fit-margin-left="0"
+     fit-margin-top="0"
+     showgrid="false"
+     id="namedview41"
+     inkscape:window-height="2066"
+     inkscape:window-width="3840"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <defs
+     id="defs5">
+    <clipPath
+       id="clip0">
+      <rect
+         id="rect2"
+         height="720"
+         width="1280"
+         y="0"
+         x="0" />
+    </clipPath>
+  </defs>
+  <text
+     y="34.183594"
+     x="-0.59765625"
+     font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif"
+     font-weight="400"
+     font-size="24px"
+     id="text21">Δ<tspan
+   x="13.735641"
+   y="34.183594"
+   id="tspan9">S</tspan><tspan
+   x="25.569046"
+   y="34.183594"
+   id="tspan11" /><tspan
+   x="30.902344"
+   y="34.183594"
+   id="tspan13">→E</tspan><tspan
+   x="71.569046"
+   y="34.183594"
+   id="tspan15">=</tspan><tspan
+   x="98.709045"
+   y="16.183594"
+   id="tspan17">𝑆</tspan><tspan
+   x="96.235641"
+   y="50.183594"
+   id="tspan19">𝑁</tspan></text>
+  <path
+     d="m 96.015445,26.588594 h 18.000005 v 2 H 96.015445 Z"
+     fill-rule="evenodd"
+     id="path23" />
+  <text
+     y="16.183594"
+     x="125.88945"
+     font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif"
+     font-weight="400"
+     font-size="24px"
+     id="text31">𝑅<tspan
+   font-size="18px"
+   x="140.80945"
+   y="21.183594"
+   id="tspan25">0</tspan><tspan
+   x="118.32277"
+   y="50.183594"
+   id="tspan27">𝑇</tspan><tspan
+   font-size="18px"
+   x="130.07613"
+   y="55.183594"
+   id="tspan29">𝑖𝑛𝑓</tspan></text>
+  <path
+     d="m 118.01545,26.588594 h 41 v 2 h -41 z"
+     fill-rule="evenodd"
+     id="path33" />
+  <text
+     y="34.183594"
+     x="163.53545"
+     font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif"
+     font-weight="400"
+     font-size="24px"
+     id="text35">𝐼</text>
+</svg>
