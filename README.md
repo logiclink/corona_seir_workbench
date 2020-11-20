@@ -164,7 +164,7 @@ Eine viel weitergehende Modellierung wären z.B. die Ansätze von Frau Prof. Pri
 
 *__Letztendlich ist die Corona SEIR Workbench nur eine Infrastruktur und wartet auf den nächsten Einsatz. Wir sind gespannt, welche Einsatzmöglichkeiten Sie finden.__*
 
-Fragen oder Anregungen zur Workbench können Sie uns entweder direkt [zumailen](mailto://info@logiclink.de) oder als [Eintrag](https://github.com/logiclink/Cluster-Diary/issues) bei Github schreiben.
+Fragen oder Anregungen zur Workbench können Sie uns entweder direkt [zumailen](mailto://info@logiclink.de) oder als [Eintrag](https://github.com/logiclink/corona_seir_workbench/issues) bei Github schreiben.
 
 *[LogicLink, Marcus Müller](https://www.logiclink.de), November 2020*
 
