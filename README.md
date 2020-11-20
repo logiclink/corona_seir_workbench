@@ -15,10 +15,8 @@ Auf der Basis der ermittelten Daten können [Epidemie-Modelle](https://en.wikipe
 ## Das SEIR Modell
 Das [SEIR-Modell](https://de.wikipedia.org/wiki/SEIR-Modell) gehört zur Klasse der Kompartiment-Modelle, die Personen in Kompartimente einsortiert. Das SEIR-Modell teilt die Bevölkerung in die vier Kompartimente „**S**usceptible“ (anfällige Personen), „**E**xposed“ (exponierte Personen), „**I**nfectious“ (infektiöse Personen) und „**R**ecovered“ (erholte bzw. gestorbene Personen) ein:
 
-https://raw.githubusercontent.com/logiclink/Cluster-Diary/main/Cluster-Infektionen.svg?sanitize=true
-
-![Kompartments des SEIR-Modells](images/SEIR.svg)
-<p style="text-align: center;"><sup>Kompartments des SEIR-Modells</sup></p>
+<p align="center"><img src="images/SEIR.svg" alt="Kompartments des SEIR-Modells"></p>
+<p align="center"><sup>Kompartments des SEIR-Modells</sup></p>
 
 Bei der Modellierung wandern Personen von einem Kompartiment ins nächste. Die Berechnung findet je Zeiteinheit statt. Als Zeiteinheit wird meist ein Tag verwendet.
 
@@ -33,23 +31,23 @@ Nachdem eine Person die Krankheit überstanden hat und nicht mehr infektiös ist
 ## Die Mathematik hinter dem SEIR Modell
 In der Modellierung des SEIR Modells wird die Veränderung aller vier Kompartimente je Zeiteinheit berechnet. Im ersten Schritt werden ΔS anfällige Personen im Kompartiment *S* durch infektiöse Personen im Kompartiment *I* infiziert. Hierfür neben der Menge der infektiösen Personen die [Basisreproduktionszahl R₀](https://de.wikipedia.org/wiki/Basisreproduktionszahl) ausschlaggebend:
 
-<p style="text-align: center;"><img src="images/SEIR%20delta%20Susceptible.svg" alt="SEIR ΔSusceptible"></p>
+<p align="center"><img src="images/SEIR%20delta%20Susceptible.svg" alt="SEIR ΔSusceptible"></p>
 
 Für SARS-COV-2 wurde ein R₀-Wert von 3,4<sup>[5](#f5)</sup> für eine ungebremste Verbreitung ermittelt. Das heißt im Mittel steckt ein Infizierter 3,4 weitere anfällige Personen an. Ein R₀-Wert größer 1 sorgt für ein exponentielles Wachstum von Infektionen, während ein R₀-Wert kleiner 1 zu einer abnehmende Zahl von neu infizierten Personen sorgt.
 
 Die Änderung der infektiösen Personen ΔE ergibt sich aus der Inkubationsdauer:
 
-<p style="text-align: center;"><img src="images/SEIR%20delta%20Exposed.svg" alt="SEIR ΔExposed"></p>
+<p align="center"><img src="images/SEIR%20delta%20Exposed.svg" alt="SEIR ΔExposed"></p>
 
 Daher wächst die Zahl der infektiösen Personen mit einem gewissen Zeitverzug nach ihrer Infektion.
 
 Nachdem die Krankheit überstanden ist oder die infektiöse Person isoliert wurde, wandert diese in das Kompartiment *R*. Die Anzahl ΔI ergibt sich aus der mittleren Infektiositätsdauer:
 
-<p style="text-align: center;"><img src="images/SEIR%20delta%20Infectious.svg" alt="SEIR ΔInfectious"></p>
+<p align="center"><img src="images/SEIR%20delta%20Infectious.svg" alt="SEIR ΔInfectious"></p>
 
 Die verwendeten Symbole in den Gleichungen stehen für folgende Werte:
 
-<p style="text-align: center;"><img src="images/SEIR%20Legende.svg" alt="SEIR Legende"></p>
+<p align="center"><img src="images/SEIR%20Legende.svg" alt="SEIR Legende"></p>
 
 Die neuen Personenanzahlen *S‘*, *E‘*, *I‘* und *R‘* in den einzelnen Kompartimenten *S*, *E*, *I* und *R* nach einer Zeiteinheit kann nach folgenden Formeln berechnet werden:
 
@@ -95,30 +93,30 @@ Einstellungen des Diagramms und des SEIR Modells können mit der Schaltfläche �
 ### Ergebnisse der Workbench
 Die einfachste Modellierung verwendet ein SEIR-Modell mit einer ungebremsten Ausbreitung des SARS-COV-2 Virus und einer konstanten Basisreproduktionszahl von 3,4 für Deutschland.
 
-![SEIR-Modell für Deutschland](images/SEIR%20Germany%20without%20measures.svg)
-<p style="text-align: center;"><sup>SEIR-Modell für Deutschland</sup></p>
+<p align="center"><img src="images/SEIR%20Germany%20without%20measures.svg" alt="SEIR-Modell für Deutschland"></p>
+<p align="center"><sup>SEIR-Modell für Deutschland</sup></p>
 
 In diesem Fall hätte sich fast die gesamte Bevölkerung im April und Mai diesen Jahres infiziert. Die tatsächlichen Fallzahlen der Johns-Hopkins-Universität für Deutschland zeigen jedoch einen anderen Verlauf:
 
-![Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020](images/SEIR%20Germany%20JHE.svg)
-<p style="text-align: center;"><sup>Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020</sup></p>
+<p align="center"><img src="images/SEIR%20Germany%20JHE.svg" alt="Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020"></p>
+<p align="center"><sup>Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020</sup></p>
 
 Der Grund für den unterschiedlichen Verlauf erklärt sich aus den R₀-Werten des Robert Koch-Instituts, die im April von 3,4 auf unter 1 gefallen sind:
 
-![Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020 mit R₀-Werten des Robert Koch-Instituts](images/SEIR%20Germany%20JHE%20+%20RKI%20R0.svg)
-<p style="text-align: center;"><sup>Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020 mit R₀-Werten des Robert Koch-Instituts</sup></p>
+<p align="center"><img src="images/SEIR%20Germany%20JHE%20+%20RKI%20R0.svg" alt="Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020 mit R₀-Werten des Robert Koch-Instituts"></p>
+<p align="center"><sup>Fallzahlen der Johns-Hopkins-Universität vom 13.11.2020 mit R₀-Werten des Robert Koch-Instituts</sup></p>
 
 Die Basisreproduktionszahl hat sich durch den deutschlandweiten Lockdown und Kontaktverbote deutlich reduziert. Der Peek Mitte Juni entstand wahrscheinlich durch die hohe Anzahl an Corona-Infizierten im Kreis Gütersloh verursacht durch Fleischereibetriebe. Da es sich um einen lokalen Ausbruch handelte, konnte dieser recht schnell eingedämmt werden.
 
 Wenn die historischen R₀-Werte nach der Levenberg-Marquardt-Methode<sup>[8](#f8)</sup> berechnet werden, zeigt das SEIR-Modell die gleichen Werte. Die Fallzahlen (gelbe Linie) entsprechen den tatsächlichen Infektionszahlen (rote Linie) bis zum 13.11.2020, dem aktuellen Datum. Wenn der aktuelle R₀-Wert in Höhe von 1,2 beibehalten wird, ist für die Zukunft jedoch ein weiterer starker Anstieg zu befürchten und eine Verdoppelung der Fallzahlen findet in weniger als einem Monat statt (gelbe Raute).
 
-![SEIR Prognose mit berechneten R₀ Basisreproduktionszahlen](images/SEIR%20Germany%20with%20R0.svg)
-<p style="text-align: center;"><sup>SEIR Prognose mit berechneten R₀ Basisreproduktionszahlen</sup></p>
+<p align="center"><img src="images/SEIR%20Germany%20with%20R0.svg" alt="SEIR Prognose mit berechneten R₀ Basisreproduktionszahlen"></p>
+<p align="center"><sup>SEIR Prognose mit berechneten R₀ Basisreproduktionszahlen</sup></p>
 
 Der berechnete R₀-Werte im März ist deutlich höher als der vom RKI ermittelte Wert. Dies liegt an den geringen Fallzahlen im Februar und Anfang März. Es ist eine grundsätzliche Schwäche des R₀-Wertes, bei geringen Fallzahlen hohe Schwankungen aufzuweisen. Daher wurde auch im Sommer auf die 7-Tage Inzidenzzahl als Beurteilungskriterium umgestellt.
 
-![SEIR 7-Tage Inzidenz Prognose mit berechneten R₀ Basisreproduktionszahlen](images/SEIR%20Germany%207Day%20Incidence.svg)
-<p style="text-align: center;"><sup>SEIR 7-Tage Inzidenz Prognose mit berechneten R₀ Basisreproduktionszahlen</sup></p>
+<p align="center"><img src="images/SEIR%20Germany%207Day%20Incidence.svg" alt="SEIR 7-Tage Inzidenz Prognose mit berechneten R₀ Basisreproduktionszahlen"></p>
+<p align="center"><sup>SEIR 7-Tage Inzidenz Prognose mit berechneten R₀ Basisreproduktionszahlen</sup></p>
 
 Auch hier entspricht die Kurve der Johns-Hopkins-Daten dem SEIR Modell. Hier wurde jedoch für die Zukunft ein R₀-Wert von 0.9 verwendet, der nahe bei dem 7-Tages R₀-Wert vom 8.11.2020 des RKI aus der Nowcasting-Tabelle vom 13.11.2020 liegt. In diesem Fall würde die 7-Tages Inzidenz Anfang Dezember unter 100 Fälle pro Tag fallen.
 
@@ -127,26 +125,26 @@ Die unterschiedlichen Szenarien zeigen, wie kritisch die Basisreproduktionszahl 
 ### Das Klassenmodell der Workbench
 Die Corona Workbench arbeitet mit einem Interface-basierten Klassenmodell für die Berechnung von SEIR-Modellen. Jedes SEIR-Modell verfügt über eine *ISEIR*-Schnittstelle, in der die SEIR-Parameter angegeben werden und die Personenanzahl für die Kompartimente *S*, *E*, *I* und *R* abgefragt werden können. Mit einer Calc-Methode werden diese für eine bestimmte Anzahl von Zeiteinheiten berechnet. Die Berechnung der Kompartimente *S‘*, *E‘*, *I‘* und *R‘* in der Calc-Methode erfolgt über statische Funktionen und kann hier einfach angepasst werden. Die Initialisierung der *ISEIR*-Modelle findet über Konstruktoren statt.
 
-![SEIR Klassenmodell](images/SEIR%20Klassenmodell.svg)
-<p style="text-align: center;"><sup>SEIR Klassenmodell</sup></p>
+<p align="center"><img src="images/SEIR%20Klassenmodell.svg" alt="SEIR Klassenmodell"></p>
+<p align="center"><sup>SEIR Klassenmodell</sup></p>
 
 Um ein *ISEIR*-Objekt anzuzeigen wird dieses an eine Sicht übergeben. Dies kann entweder eine *ISeriesView* für diskrete Zeitabschnitte oder eine *IDateSeriesView* für ein Zeitintervall mit Start- und Enddatum sein. Über die *CalcAsync*-Methoden wird das Modell berechnet und die einzelnen Datenpunkt ein Datenserien gespeichert. Die Sicht *SEIRR0DateSeriesView* erlaubt die Übergabe verschiedener R₀-Werte für ein Datum.
 
 Die Berechnung der R₀-Werte erfolgt über Solver mit einer *IR0Solver*-Schnittstelle. Diese implementiert eine *Solve*-Methode, die eine Sequenz von R₀-Werten zurückgibt. Das Interface wird von einer *SEIRR0Solver*-Klasse implementiert, die für jeden Tag die Fallzahlen eines SEIR-Modells mit den tatsächlichen Fallzahlen vergleicht und den besten R₀-Wert für den Tag mit der Levenberg-Marquardt-Methode<sup>[8](#f8)</sup> berechnet. Dafür werden der Einfachheit halber aller R₀-Werte zwischen 0 und 10 in 0,1 Schritten berechnet und der Wert mit der kleinsten Abweichung in den Fallzahlen zurückgegeben.
 
-![Klassenmodell der R₀-Solver](images/R0-Solver%20Klassenmodell.svg)
-<p style="text-align: center;"><sup>Klassenmodell der R₀-Solver</sup></p>
+<p align="center"><img src="images/R0-Solver%20Klassenmodell.svg" alt="Klassenmodell der R₀-Solver"></p>
+<p align="center"><sup>Klassenmodell der R₀-Solver</sup></p>
 
 Historische Infektionszahlen des [Center for Systems Science and Engineering](https://systems.jhu.edu/) der Johns-Hopkins werden über ein *JHU*-Objekt ermittelt und als Datenserien über die Sicht *JHUDateSeiriesView* zurückgegeben. Da es sich bei den Daten der Johns-Hopkins-Universität um einen Spezialfall handelt, wurde kein Interface für die *JHU*-Klasse verwendet:
 
-![Klassen für den Abruf der Johns-Hopkins CSSE Daten](images/JHE%20Klassenmodell.svg)
-<p style="text-align: center;"><sup>Klassen für den Abruf der Johns-Hopkins CSSE Daten</sup></p>
+<p align="center"><img src="images/JHE%20Klassenmodell.svg" alt="Klassen für den Abruf der Johns-Hopkins CSSE Daten"></p>
+<p align="center"><sup>Klassen für den Abruf der Johns-Hopkins CSSE Daten</sup></p>
 
 Das *JHU*-Objekt speichert die abgerufenen Daten in einer temporären CSV-Datei zwischen und versucht diese möglichst schnell zu parsen.
 Den gleichen Ansatz verfolgt die *RKINowcasting*-Klasse, die die [Nowcasting-Excel-Liste](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx) des [Robert Koch-Instituts](https://www.rki.de/) einmal täglich herunterlädt und die Spalten „Punktschätzer der Reproduktionszahl R“, sowie „Punktschätzer des 7-Tage-R Wertes“ für ein Datum zurückgibt.
 
-![Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten](images/RKI%20Nowcasting%20Klassenmodell.svg)
-<p style="text-align: center;"><sup>Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten</sup></p>
+<p align="center"><img src="images/RKI%20Nowcasting%20Klassenmodell.svg" alt="Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten"></p>
+<p align="center"><sup>Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten</sup></p>
 
 Die aktuelle Bevölkerungszahl eines Landes wird mit der Klasse *WPPopulation* über das [World-Bank API](https://data.worldbank.org/) ermittelt. 
 
