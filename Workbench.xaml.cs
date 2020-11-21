@@ -46,44 +46,49 @@ namespace LogicLink.Corona {
             _bUpdating = true;
 
             if(vm.SolveR0 || vm.SolveR0Interval) {
-                _pgr.Report(1, "Calculating basic reproduction numbers ...", true);
+                try {
+                    _pgr.Report(1, "Calculating basic reproduction numbers ...", true);
 
-                SEIR seirR0 = new SEIR(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
-                List<JHU.Record> l = await new JHU().GetDataAsync(vm.Country).ToListAsync();
-                _pgr.Report(5);
+                    SEIR seirR0 = new SEIR(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
+                    List<JHU.Record> l = await new JHU().GetDataAsync(vm.Country).ToListAsync();
+                    _pgr.Report(5);
 
-                // Align confirmed numbers with model
-                for(int i = 1; i <= (l[0].Date - vm.Start).Days; i++)
-                    seirR0.Calc(i);
-                List<int> ll = l.Skip((vm.Start - l[0].Date).Days).Select(r => r.Confirmed).ToList();
-                _pgr.Report(6);
+                    // Align confirmed numbers with model
+                    for(int i = 1; i <= (l[0].Date - vm.Start).Days; i++)
+                        seirR0.Calc(i);
+                    List<int> ll = l.Skip((vm.Start - l[0].Date).Days).Select(r => r.Confirmed).ToList();
+                    _pgr.Report(6);
 
-                Progress pgrR0 = new Progress(7, 91);
-                pgrR0.Changed += _pgr_Changed;
+                    Progress pgrR0 = new Progress(7, 91);
+                    pgrR0.Changed += _pgr_Changed;
 
-                // Create dictionary of R₀ values per date
-                _dicReproduction = new Dictionary<DateTime, double>();
-                int j = 0;
-                DateTime dt = l[0].Date < vm.Start ? vm.Start : l[0].Date;
-                IR0Solver slr = vm.SolveR0 
-                                ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = ll } as IR0Solver
-                                : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = ll };
-                foreach(double d in slr.Solve(pgrR0))
-                    _dicReproduction.Add(dt.AddDays(j++), d);
+                    // Create dictionary of R₀ values per date
+                    _dicReproduction = new Dictionary<DateTime, double>();
+                    int j = 0;
+                    DateTime dt = l[0].Date < vm.Start ? vm.Start : l[0].Date;
+                    IR0Solver slr = vm.SolveR0 
+                                    ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = ll } as IR0Solver
+                                    : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = ll };
+                    foreach(double d in slr.Solve(pgrR0))
+                        _dicReproduction.Add(dt.AddDays(j++), d);
 
-                _pgr.Report(99);
+                    _pgr.Report(99);
 
-                // Calculate R₀ median of last 5 days
-                double dR0Sum = 0d;
-                for(int k = j - 5; k < j; k++)
-                    dR0Sum += _dicReproduction[dt.AddDays(k)];
-                //for(DateTime dtFuture = dt.AddDays(j); dtFuture <= vm.End; dtFuture = dtFuture.AddDays(1))
-                //    _dicReproduction.Add(dtFuture, dR0Sum / 5);
-                vm.Reproduction = dR0Sum / 5;
+                    // Calculate R₀ median of last 5 days
+                    double dR0Sum = 0d;
+                    for(int k = j - 5; k < j; k++)
+                        dR0Sum += _dicReproduction[dt.AddDays(k)];
+                    //for(DateTime dtFuture = dt.AddDays(j); dtFuture <= vm.End; dtFuture = dtFuture.AddDays(1))
+                    //    _dicReproduction.Add(dtFuture, dR0Sum / 5);
+                    vm.Reproduction = dR0Sum / 5;
 
-                pgrR0.Changed -= _pgr_Changed;
+                    pgrR0.Changed -= _pgr_Changed;
 
-                _pgr.Report(100);
+                    _pgr.Report(100);
+                } catch(Exception ex) {
+                    MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}");
+                    Close();
+                }
             } else
                 _dicReproduction = null;
 
@@ -128,70 +133,74 @@ namespace LogicLink.Corona {
         private async Task UpdateChartAsync(WorkbenchViewModel vm) {
             _bUpdating = true;
 
-            _pgr.Report(1, "Calculating chart series ...", true);
+            try {
+                _pgr.Report(1, "Calculating chart series ...", true);
 
-            // 2. Calculate SEIR model and create series
-            ISEIR seir = new SEIR(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
-            IDateSeriesView vSeir = _dicReproduction == null
-                                    ? (IDateSeriesView) new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
-                                    : new SEIRR0DateSeriesView(seir, _dicReproduction, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker);
-            if(vm.ShowSusceptible || vm.ShowExposed || vm.ShowInfectious || vm.ShowRemoved || vm.ShowCases || vm.ShowDaily || vm.Show7Days || vm.ShowReproduction) {
-                Progress pgrSeir = new Progress(2, 31);
-                pgrSeir.Changed += _pgr_Changed;
-                await vSeir.CalcAsync(vm.Start, vm.End, pgrSeir);
-                pgrSeir.Changed -= _pgr_Changed;
-            }
+                // 2. Calculate SEIR model and create series
+                ISEIR seir = new SEIR(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
+                IDateSeriesView vSeir = _dicReproduction == null
+                                        ? (IDateSeriesView) new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
+                                        : new SEIRR0DateSeriesView(seir, _dicReproduction, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker);
+                if(vm.ShowSusceptible || vm.ShowExposed || vm.ShowInfectious || vm.ShowRemoved || vm.ShowCases || vm.ShowDaily || vm.Show7Days || vm.ShowReproduction) {
+                    Progress pgrSeir = new Progress(2, 31);
+                    pgrSeir.Changed += _pgr_Changed;
+                    await vSeir.CalcAsync(vm.Start, vm.End, pgrSeir);
+                    pgrSeir.Changed -= _pgr_Changed;
+                }
 
-            // 3. Get JHE data and create series
-            JHU jhu = new JHU();
-            JHUDateSeriesView vJhu = new JHUDateSeriesView(jhu, vm.Country, vm.Population, vm.ShowConfirmed, vm.ShowDailyConfirmed, vm.Show7DaysConfirmed, vm.ShowRecovered, vm.ShowDeaths);
-            if(vm.ShowConfirmed || vm.ShowDailyConfirmed  || vm.Show7DaysConfirmed || vm.ShowRecovered || vm.ShowDeaths) {
-                Progress pgrJhu = new Progress(34, 30);
-                pgrJhu.Changed += _pgr_Changed;
-                await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
-                pgrJhu.Changed -= _pgr_Changed;
-            }
+                // 3. Get JHE data and create series
+                JHU jhu = new JHU();
+                JHUDateSeriesView vJhu = new JHUDateSeriesView(jhu, vm.Country, vm.Population, vm.ShowConfirmed, vm.ShowDailyConfirmed, vm.Show7DaysConfirmed, vm.ShowRecovered, vm.ShowDeaths);
+                if(vm.ShowConfirmed || vm.ShowDailyConfirmed  || vm.Show7DaysConfirmed || vm.ShowRecovered || vm.ShowDeaths) {
+                    Progress pgrJhu = new Progress(34, 30);
+                    pgrJhu.Changed += _pgr_Changed;
+                    await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
+                    pgrJhu.Changed -= _pgr_Changed;
+                }
 
-            // 3. Get RKI nowcasting data and create series
-            RKINowcasting rnc = new RKINowcasting();
-            RKINowcastingDateSeriesView vRnc = new RKINowcastingDateSeriesView(rnc, vm.ShowNowcasting, vm.ShowNowcasting7Day);
-            if(vm.ShowNowcasting || vm.ShowNowcasting7Day) {
-                Progress pgrRnc = new Progress(65, 30);
-                pgrRnc.Changed += _pgr_Changed;
-                await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
-                pgrRnc.Changed -= _pgr_Changed;
-            }
+                // 3. Get RKI nowcasting data and create series
+                RKINowcasting rnc = new RKINowcasting();
+                RKINowcastingDateSeriesView vRnc = new RKINowcastingDateSeriesView(rnc, vm.ShowNowcasting, vm.ShowNowcasting7Day);
+                if(vm.ShowNowcasting || vm.ShowNowcasting7Day) {
+                    Progress pgrRnc = new Progress(65, 30);
+                    pgrRnc.Changed += _pgr_Changed;
+                    await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
+                    pgrRnc.Changed -= _pgr_Changed;
+                }
 
-            // 4. Update Title
-            cht.Titles[0].Text = vm.Country;
+                // 4. Update Title
+                cht.Titles[0].Text = vm.Country;
 
-            // 5. Add strip lines for weekend
-            cht.ChartAreas[0].AxisX.StripLines.Clear();
-            cht.ChartAreas[0].AxisX.StripLines.Add(new StripLine { IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
-                                                                   Interval = 7,
-                                                                   StripWidth = 2,
-                                                                   BackColor = Color.FromArgb(247, 247, 247) });
+                // 5. Add strip lines for weekend
+                cht.ChartAreas[0].AxisX.StripLines.Clear();
+                cht.ChartAreas[0].AxisX.StripLines.Add(new StripLine { IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
+                                                                       Interval = 7,
+                                                                       StripWidth = 2,
+                                                                       BackColor = Color.FromArgb(247, 247, 247) });
 
-            // 6. Show available series
-            cht.Series.Clear();
-            _pgr.Report(96);
-            cht.Series.Add(vSeir);
-            _pgr.Report(97);
-            cht.Series.Add(vRnc);
-            _pgr.Report(98);
-            cht.Series.Add(vJhu);
-            _pgr.Report(99);
+                // 6. Show available series
+                cht.Series.Clear();
+                _pgr.Report(96);
+                cht.Series.Add(vSeir);
+                _pgr.Report(97);
+                cht.Series.Add(vRnc);
+                _pgr.Report(98);
+                cht.Series.Add(vJhu);
+                _pgr.Report(99);
 
-            cht.ChartAreas[0].RecalculateAxesScale();
+                cht.ChartAreas[0].RecalculateAxesScale();
 
-            _pgr.Report(100);
+                _pgr.Report(100);
 
-            // 7. Add Legend
-            cht.Legends.Clear();
-            cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
+                // 7. Add Legend
+                cht.Legends.Clear();
+                cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
             
-            _pgr.Report(100, "Ready", false);
-
+                _pgr.Report(100, "Ready", false);
+            } catch(Exception ex) {
+                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}");
+                Close();
+            }
             _bUpdating = false;
         }
 
@@ -243,7 +252,14 @@ namespace LogicLink.Corona {
             vm.PropertyChanged += vm_PropertyChanged;
 
             // Initialize Johns Hopkins University data
-            Dispatcher.BeginInvoke((Action)(async () => await new JHU().LoadAsync()), DispatcherPriority.Background);
+            Dispatcher.BeginInvoke((Action)(async () => {
+                try {
+                    await new JHU().LoadAsync();
+                } catch(Exception ex) {
+                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}");
+                    Close();
+                }
+            }), DispatcherPriority.Background);
 
             InitChart();
             Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(vm.SolveR0 || vm.SolveR0Interval)

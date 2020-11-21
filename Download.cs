@@ -15,14 +15,16 @@ namespace LogicLink.Corona {
         /// <returns>Path to the cached file</returns>
         public static async Task<string> GetCachedAsync(Uri u) {
             string f = $@"{Path.GetTempPath()}{DateTime.Today:yyMMdd}.{u.Segments[^1]}";
-            if(!File.Exists(f)) {
+
+            FileInfo fi = new FileInfo(f);
+            if(!fi.Exists || fi.Length == 0)
 
                 // Create file
                 using(HttpClient cli = new HttpClient())
                     using(FileStream fs = File.Create(f)) {
 
                         // Create a FileInfo object to set the file's attributes
-                        FileInfo fi = new FileInfo(f);
+                        fi = new FileInfo(f);
 
                         // Set the Attribute property of this file to Temporary. 
                         // Although this is not completely necessary, the .NET Framework is able 
@@ -34,7 +36,7 @@ namespace LogicLink.Corona {
                         Stream stm = await rm.Content.ReadAsStreamAsync();
                         await stm.CopyToAsync(fs);
                     }
-            }
+
             return f;
         }
 
