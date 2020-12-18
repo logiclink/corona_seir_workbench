@@ -8,9 +8,9 @@
     <AssemblyName>Corona</AssemblyName>
     <RootNamespace>LogicLink.Corona</RootNamespace>
     <ApplicationIcon>Corona.ico</ApplicationIcon>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.1121</AssemblyVersion>
-    <FileVersion>1.0.1.1121</FileVersion>
+    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.2.1218</AssemblyVersion>
+    <FileVersion>1.0.1.1218</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -41,7 +41,11 @@ namespace LogicLink.Corona {
                 i += j + 1;
 
                 j = sp.Slice(i).QuotedIndexOf(',');
-                string sCountry = new string(sp.Slice(i, j));
+                string sCountry = sp[i] == '"'
+                                  ? sp[i + j - 1] == '"'
+                                    ? new string(sp.Slice(i + 1, j - 2))
+                                    : new string(sp.Slice(i + 1, j - 1))
+                                  : new string(sp.Slice(i, j));
                 i += j + 1;
 
                 j = sp.Slice(i).QuotedIndexOf(',');
