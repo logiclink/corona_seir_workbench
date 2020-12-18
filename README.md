@@ -166,7 +166,7 @@ Much more advanced modelling would be, for example, Prof. Priesemann's approache
 
 *__In the end, the Corona SEIR Workbench is just an infrastructure, waiting for the next adoption. We are curious to see what applications you will find.__*
 
-You can mail us questions or suggestions about the Workbench [emailed](mailto://info@logiclink.de) directly or writte an [issue](https://github.com/logiclink/corona_seir_workbench/issues) on Github.
+You can [mail](mailto://info@logiclink.de) us questions and suggestions about the Workbench directly or write an [issue](https://github.com/logiclink/corona_seir_workbench/issues) on Github.
 
 *[LogicLink, Marcus Müller](https://www.logiclink.de), November 2020*
 
