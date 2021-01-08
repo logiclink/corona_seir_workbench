@@ -42,13 +42,13 @@ namespace LogicLink.Corona {
             if(bConfirmed)
                 _serConfirmed = new Series("Confirmed") { ChartType = SeriesChartType.Spline,
                                                           XValueType = ChartValueType.Date,
-                                                          Color = Color.Crimson,
+                                                          Color = Color.Firebrick,
                                                           BorderWidth = 5 };
 
             if(bDailyConfirmed)
                 _serDailyConfirmed = new Series("Daily Confirmed") { ChartType = SeriesChartType.Column,
                                                                      XValueType = ChartValueType.Date,
-                                                                     Color = Color.Crimson,
+                                                                     Color = Color.Firebrick,
                                                                      BorderWidth = 5  };
 
             if(b7DaysConfirmed)

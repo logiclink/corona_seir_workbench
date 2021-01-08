@@ -8,42 +8,51 @@ namespace LogicLink.Corona {
     /// <summary>
     /// ViewModel of the workbench with all workbench settings
     /// </summary>
+    // TODO: MM210104 1. End immer aktueller Monat + 1 als Standardwerts, es sei den ein anderer Wert wurde gespeichert.
     public class WorkbenchViewModel : INotifyPropertyChanged {
 
         #region Private Variables
 
-        private string _sCountry;               // Country which should be calculated
+        private string _sCountry;                       // Country which should be calculated
 
-        private int _iPopulation;               // Total number of individuals
-        private int _iInfectious;               // Number of individuals which are infectious at the beginning
-        private TimeSpan _tsIncubationPeriod;   // Timespan in which an individual is infected but not infectious
-        private TimeSpan _tsInfectiousPeriod;   // Timespan in which an individual is infectious.
-        private double _dReproduction;          // Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"
+        private int _iPopulation;                       // Total number of individuals
+        private int _iInfectious;                       // Number of individuals which are infectious at the beginning
+        private TimeSpan _tsIncubationPeriod;           // Timespan in which an individual is infected but not infectious
+        private TimeSpan _tsInfectiousPeriod;           // Timespan in which an individual is infectious.
+        private double _dReproduction;                  // Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune.
 
-        private DateTime _dtStart;              // Start date of the calculation (27.1.2020, https://www.spiegel.de/wissenschaft/medizin/erster-corona-fall-in-deutschland-die-unglueckliche-reise-von-patientin-0-a-2096d364-dcd8-4ec8-98ca-7a8ca1d63524)
-        private DateTime _dtEnd;                // End date of the calculation
+        private DateTime _dtStart;                      // Start date of the calculation (27.1.2020, https://www.spiegel.de/wissenschaft/medizin/erster-corona-fall-in-deutschland-die-unglueckliche-reise-von-patientin-0-a-2096d364-dcd8-4ec8-98ca-7a8ca1d63524)
+        private DateTime _dtEnd;                        // End date of the calculation
 
-        private bool _bShowSusceptible;         // If true, the (S)usceptible-series of the SEIR-object is shown
-        private bool _bShowExposed;             // If true, the (E)xposed-series of the SEIR-object is shown
-        private bool _bShowInfectious;          // If true, the (I)nfectious-series of the SEIR-object is shown
-        private bool _bShowRemoved;             // If true, the (R)emoved-series of the SEIR-object is shown
-        private bool _bShowCases;               // If true, the cases-series of the SEIR-object is shown
-        private bool _bShowDaily;               // If true, daily cases-series of the SEIR-object is shown
-        private bool _bShow7Days;               // If true, 7 day average of daily cases per 100.000-series of the SEIR-object is show
-        private bool _bShowReproduction;        // If true, R₀-series of the SEIR-object is shown for the second axis
-        private bool _bShowConfirmed;           // If true, confirmed-series of the JHU-data is shown
-        private bool _bShowDailyConfirmed;      // If true, daily confirmed cases-series of the JHU-data is shown
-        private bool _bShow7DaysConfirmed;      // If true, 7 day average of daily confirmed cases per 100.000-series of the JHU-data is shown
-        private bool _bShowRecovered;           // If true, total recovered-series of the JHU-data is shown
-        private bool _bShowDeaths;              // If true, total death-series of the JHU-data is shown
-        private bool _bShowNowcasting;          // If true, R₀-series of the RKI-data is shown for the second axis
-        private bool _bShowNowcasting7Day;      // If true, 7 days average R₀-series of the RKI-data is shown for the second axis
-        private bool _bShowDoubledMarker;       // If true, double value diamond markers are added to cases-, daily- and 7days-series of the SEIR-object
+        private DateTime _dtVaccinationStart;           // Start date of the vaccination
+        private int _iDailyVaccinated;                  // Number of individuals who are vaccinated per day
+        private double _dEffectiveness;                 // Effectiveness of a vaccine ranging from 0 to 1. 1 stands for 100% of protection against an infection.
 
-        private bool _bSolveR0;                 // If true, R₀ is calculated for each day with JHU-data
-        private bool _bSolveR0Interval;         // If true, R₀ is calculated for an intervall of days
-        private int _iSolveR0ResidualDayWindow; // Number of days from 1 to n for residuals with which R₀ should be calculated.
-        private int _iSolveR0IntervalDays;      // Number of days from 1 to n for the interval in which R₀ should be calculated.
+        private bool _bShowSusceptible;                 // If true, the (S)usceptible-series of the SEIR-object is shown
+        private bool _bShowExposed;                     // If true, the (E)xposed-series of the SEIR-object is shown
+        private bool _bShowInfectious;                  // If true, the (I)nfectious-series of the SEIR-object is shown
+        private bool _bShowRemoved;                     // If true, the (R)emoved-series of the SEIR-object is shown
+        private bool _bShowVaccinated;                  // If true, the (V)accinated-series of the SEIRV-object is shown
+        private bool _bShowDailyVaccinated;             // If true, daily vaccinated-series of the SEIRV-object is shown
+        private bool _bShowCases;                       // If true, the cases-series of the SEIR-object is shown
+        private bool _bShowDaily;                       // If true, daily cases-series of the SEIR-object is shown
+        private bool _bShow7Days;                       // If true, 7 day average of daily cases per 100.000-series of the SEIR-object is show
+        private bool _bShowReproduction;                // If true, R₀-series of the SEIR-object is shown for the second axis
+        private bool _bShowConfirmed;                   // If true, confirmed-series of the JHU-data is shown
+        private bool _bShowDailyConfirmed;              // If true, daily confirmed cases-series of the JHU-data is shown
+        private bool _bShow7DaysConfirmed;              // If true, 7 day average of daily confirmed cases per 100.000-series of the JHU-data is shown
+        private bool _bShowRecovered;                   // If true, total recovered-series of the JHU-data is shown
+        private bool _bShowDeaths;                      // If true, total death-series of the JHU-data is shown
+        private bool _bShowNowcasting;                  // If true, R₀-series of the RKI-data is shown for the second axis
+        private bool _bShowNowcasting7Day;              // If true, 7 days average R₀-series of the RKI-data is shown for the second axis
+        private bool _bShowDoubledMarker;               // If true, double value diamond markers are added to cases-, daily- and 7days-series of the SEIR-object
+        private bool _bShowConfirmedVaccinated;         // If true, vaccinated-series of the OWID-data is shown
+        private bool _bShowDailyConfirmedVaccinated;    // If true, daily vaccinated-series of the OWID-data is shown
+
+        private bool _bSolveR0;                         // If true, R₀ is calculated for each day with JHU-data
+        private bool _bSolveR0Interval;                 // If true, R₀ is calculated for an intervall of days
+        private int _iSolveR0ResidualDayWindow;         // Number of days from 1 to n for residuals with which R₀ should be calculated.
+        private int _iSolveR0IntervalDays;              // Number of days from 1 to n for the interval in which R₀ should be calculated.
 
         #endregion
 
@@ -145,6 +154,42 @@ namespace LogicLink.Corona {
             }
         }
 
+        /// <summary>
+        /// Gets or sets the start date of the vaccination
+        /// </summary>
+        public DateTime VaccinationStart {
+            get { return _dtVaccinationStart; }
+            set { if(_dtVaccinationStart != value) {
+                    _dtVaccinationStart = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Number of individuals who are vaccinated per day
+        /// </summary>
+        public int DailyVaccinated {
+            get { return _iDailyVaccinated; }
+            set { if(_iDailyVaccinated != value) {
+                    _iDailyVaccinated = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Effectiveness of a vaccine ranging from 0 to 1. 1 stands for 100% of protection against an infection.
+        /// </summary>
+        public double Effectiveness {
+            get { return _dEffectiveness; }
+            set { if(_dEffectiveness != value) {
+                    _dEffectiveness = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         #endregion
 
         #region Public Show Properties
@@ -192,6 +237,30 @@ namespace LogicLink.Corona {
             get { return _bShowRemoved; }
             set { if(_bShowRemoved != value) {
                     _bShowRemoved = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Show 'Vaccinated' series
+        /// </summary>
+        public bool ShowVaccinated {
+            get { return _bShowVaccinated; }
+            set { if(_bShowVaccinated != value) {
+                    _bShowVaccinated = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Show 'Daily Vaccinated' series
+        /// </summary>
+        public bool ShowDailyVaccinated {
+            get { return _bShowDailyVaccinated; }
+            set { if(_bShowDailyVaccinated != value) {
+                    _bShowDailyVaccinated = value;
                     OnPropertyChanged();
                 }
             }
@@ -342,6 +411,30 @@ namespace LogicLink.Corona {
             }
         }
 
+        /// <summary>
+        /// Show 'Vaccinated' series
+        /// </summary>
+        public bool ShowConfirmedVaccinated {
+            get { return _bShowConfirmedVaccinated; }
+            set { if(_bShowConfirmedVaccinated != value) {
+                    _bShowConfirmedVaccinated = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Show 'Daily Vaccinated' series
+        /// </summary>
+        public bool ShowDailyConfirmedVaccinated {
+            get { return _bShowDailyConfirmedVaccinated; }
+            set { if(_bShowDailyConfirmedVaccinated != value) {
+                    _bShowDailyConfirmedVaccinated = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         #endregion
 
         #region Public Solve Properties
@@ -407,33 +500,44 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Loads view model from settigs
         /// </summary>
-        public void Load(bool bShow = true) {
+        /// <param name="bShow">If false, show parameters are skipped</param>
+        /// <param name="bLoadStartEnd">If false, start and end are not loaded</param>
+        public void Load(bool bShow = true, bool bLoadStartEnd = true) {
             this.Country = Settings.Default.Country;
             this.Population = Settings.Default.Population;
             this.Infectious = Settings.Default.Infectious;
             this.IncubationPeriod = Settings.Default.IncubationPeriod;
             this.InfectiousPeriod = Settings.Default.InfectiousPeriod;
             this.Reproduction = Settings.Default.Reproduction;
-            this.Start = Settings.Default.Start;
-            this.End = Settings.Default.End;
-            this.ShowSusceptible =    bShow && (Settings.Default.Show >>  0 & 1) == 1;
-            this.ShowExposed =        bShow && (Settings.Default.Show >>  1 & 1) == 1;
-            this.ShowInfectious =     bShow && (Settings.Default.Show >>  2 & 1) == 1;
-            this.ShowRemoved =        bShow && (Settings.Default.Show >>  3 & 1) == 1;
-            this.ShowCases =          bShow && (Settings.Default.Show >>  4 & 1) == 1;
-            this.ShowDaily =          bShow && (Settings.Default.Show >>  5 & 1) == 1;
-            this.Show7Days =          bShow && (Settings.Default.Show >>  6 & 1) == 1;
-            this.ShowReproduction =   bShow && (Settings.Default.Show >>  7 & 1) == 1;
-            this.ShowDoubledMarker =  bShow && (Settings.Default.Show >>  8 & 1) == 1;
-            this.ShowConfirmed =      bShow && (Settings.Default.Show >>  9 & 1) == 1;
-            this.ShowDailyConfirmed = bShow && (Settings.Default.Show >> 10 & 1) == 1;
-            this.Show7DaysConfirmed = bShow && (Settings.Default.Show >> 12 & 1) == 1;
-            this.ShowRecovered =      bShow && (Settings.Default.Show >> 13 & 1) == 1;
-            this.ShowDeaths =         bShow && (Settings.Default.Show >> 14 & 1) == 1;
-            this.ShowNowcasting =     bShow && (Settings.Default.Show >> 15 & 1) == 1;
-            this.ShowNowcasting7Day = bShow && (Settings.Default.Show >> 16 & 1) == 1;
-            this.SolveR0 =            (Settings.Default.Solve >> 0 & 1) == 1;
-            this.SolveR0Interval =    (Settings.Default.Solve >> 1 & 1) == 1;
+            if(bLoadStartEnd) {
+                this.Start = Settings.Default.Start;
+                this.End = Settings.Default.End ?? new DateTime(DateTime.Today.AddDays(15).AddMonths(1).Year, DateTime.Today.AddDays(15).AddMonths(1).Month, 1).AddDays(-1);
+            }
+            this.VaccinationStart = Settings.Default.VaccinationStart;
+            this.DailyVaccinated = Settings.Default.DailyVaccinated;
+            this.Effectiveness = Settings.Default.Effectiveness;
+            this.ShowSusceptible =              bShow && (Settings.Default.Show >>  0 & 1) == 1;
+            this.ShowExposed =                  bShow && (Settings.Default.Show >>  1 & 1) == 1;
+            this.ShowInfectious =               bShow && (Settings.Default.Show >>  2 & 1) == 1;
+            this.ShowRemoved =                  bShow && (Settings.Default.Show >>  3 & 1) == 1;
+            this.ShowVaccinated =               bShow && (Settings.Default.Show >>  4 & 1) == 1;
+            this.ShowDailyVaccinated =          bShow && (Settings.Default.Show >>  5 & 1) == 1;
+            this.ShowCases =                    bShow && (Settings.Default.Show >>  6 & 1) == 1;
+            this.ShowDaily =                    bShow && (Settings.Default.Show >>  7 & 1) == 1;
+            this.Show7Days =                    bShow && (Settings.Default.Show >>  8 & 1) == 1;
+            this.ShowReproduction =             bShow && (Settings.Default.Show >>  9 & 1) == 1;
+            this.ShowDoubledMarker =            bShow && (Settings.Default.Show >> 10 & 1) == 1;
+            this.ShowConfirmed =                bShow && (Settings.Default.Show >> 11 & 1) == 1;
+            this.ShowDailyConfirmed =           bShow && (Settings.Default.Show >> 12 & 1) == 1;
+            this.Show7DaysConfirmed =           bShow && (Settings.Default.Show >> 13 & 1) == 1;
+            this.ShowRecovered =                bShow && (Settings.Default.Show >> 14 & 1) == 1;
+            this.ShowDeaths =                   bShow && (Settings.Default.Show >> 15 & 1) == 1;
+            this.ShowNowcasting =               bShow && (Settings.Default.Show >> 16 & 1) == 1;
+            this.ShowNowcasting7Day =           bShow && (Settings.Default.Show >> 17 & 1) == 1;
+            this.ShowConfirmedVaccinated =      bShow && (Settings.Default.Show >> 18 & 1) == 1;
+            this.ShowDailyConfirmedVaccinated = bShow && (Settings.Default.Show >> 19 & 1) == 1;
+            this.SolveR0 =                      (Settings.Default.Solve >> 0 & 1) == 1;
+            this.SolveR0Interval =              (Settings.Default.Solve >> 1 & 1) == 1;
             this.SolveR0ResidualDayWindow = Settings.Default.SolveR0ResidualDayWindow;
             this.SolveR0IntervalDays = Settings.Default.SolveR0IntervalDays;
         }
@@ -450,24 +554,31 @@ namespace LogicLink.Corona {
             Settings.Default.Reproduction = _dReproduction;
             Settings.Default.Start = _dtStart;
             Settings.Default.End = _dtEnd;
-            Settings.Default.Show = (_bShowSusceptible ?    1 <<  0 : 0) |
-                                    (_bShowExposed ?        1 <<  1 : 0) |
-                                    (_bShowInfectious ?     1 <<  2 : 0) |
-                                    (_bShowRemoved ?        1 <<  3 : 0) |
-                                    (_bShowCases ?          1 <<  4 : 0) |
-                                    (_bShowDaily ?          1 <<  5 : 0) |
-                                    (_bShow7Days ?          1 <<  6 : 0) |
-                                    (_bShowReproduction ?   1 <<  7 : 0) |
-                                    (_bShowDoubledMarker ?  1 <<  8 : 0) |
-                                    (_bShowConfirmed ?      1 <<  9 : 0) |
-                                    (_bShowDailyConfirmed ? 1 << 10 : 0) |
-                                    (_bShow7DaysConfirmed ? 1 << 12 : 0) |
-                                    (_bShowRecovered ?      1 << 13 : 0) |
-                                    (_bShowDeaths ?         1 << 14 : 0) |
-                                    (_bShowNowcasting ?     1 << 15 : 0) |
-                                    (_bShowNowcasting7Day ? 1 << 16 : 0);
-            Settings.Default.Solve = (_bSolveR0 ?           1 << 0 : 0) |
-                                     (_bSolveR0Interval ?   1 << 1 : 0);
+            Settings.Default.VaccinationStart = this.VaccinationStart;
+            Settings.Default.DailyVaccinated = this.DailyVaccinated;
+            Settings.Default.Effectiveness = this.Effectiveness;
+            Settings.Default.Show = (_bShowSusceptible ?              1 <<  0 : 0) |
+                                    (_bShowExposed ?                  1 <<  1 : 0) |
+                                    (_bShowInfectious ?               1 <<  2 : 0) |
+                                    (_bShowRemoved ?                  1 <<  3 : 0) |
+                                    (_bShowVaccinated ?               1 <<  4 : 0) |
+                                    (_bShowDailyVaccinated ?          1 <<  5 : 0) |
+                                    (_bShowCases ?                    1 <<  6 : 0) |
+                                    (_bShowDaily ?                    1 <<  7 : 0) |
+                                    (_bShow7Days ?                    1 <<  8 : 0) |
+                                    (_bShowReproduction ?             1 <<  9 : 0) |
+                                    (_bShowDoubledMarker ?            1 << 10 : 0) |
+                                    (_bShowConfirmed ?                1 << 11 : 0) |
+                                    (_bShowDailyConfirmed ?           1 << 12 : 0) |
+                                    (_bShow7DaysConfirmed ?           1 << 13 : 0) |
+                                    (_bShowRecovered ?                1 << 14 : 0) |
+                                    (_bShowDeaths ?                   1 << 15 : 0) |
+                                    (_bShowNowcasting ?               1 << 16 : 0) |
+                                    (_bShowNowcasting7Day ?           1 << 17 : 0) |
+                                    (_bShowConfirmedVaccinated ?      1 << 18 : 0) |
+                                    (_bShowDailyConfirmedVaccinated ? 1 << 19 : 0);
+            Settings.Default.Solve = (_bSolveR0 ?                     1 << 0 : 0) |
+                                     (_bSolveR0Interval ?             1 << 1 : 0);
             Settings.Default.SolveR0ResidualDayWindow = _iSolveR0ResidualDayWindow;
             Settings.Default.SolveR0IntervalDays = _iSolveR0IntervalDays;
             Settings.Default.Save();
@@ -486,7 +597,7 @@ namespace LogicLink.Corona {
         /// </summary>
         public void Clear() {
             Settings.Default.Reset();
-            Load(false);
+            Load(false, false);
         }
 
         #endregion

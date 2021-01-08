@@ -36,7 +36,7 @@ namespace LogicLink.Corona {
         /// Gets the population for a country an year
         /// </summary>
         /// <param name="sCountry">Name of the Country</param>
-        /// <param name="iYear">Year of the population</param>
+        /// <param name="iYear">Year of the population. If for the year data is missing the function looks for data in previous years.</param>
         /// <returns>awaitable Population</returns>
         /// <remarks>
         /// The function caches previous values and returns population values for two ships also
@@ -55,10 +55,16 @@ namespace LogicLink.Corona {
                     break;
                 default:
                     using(HttpClient cli = new HttpClient()) {
-                        HttpResponseMessage rm = await cli.GetAsync(new Uri(string.Format(WB_POPULATION_URL, sCountryISO3, iYear)));
-                        if(rm.IsSuccessStatusCode) {
-                            JsonElement j = await JsonSerializer.DeserializeAsync<JsonElement>(await rm.Content.ReadAsStreamAsync());
-                            j[1][0].EnumerateObject().FirstOrDefault(p => p.Name == "value").Value.TryGetInt32(out iPopulation);
+                        int i = 0;
+                        while(iPopulation == 0) {
+                            HttpResponseMessage rm = await cli.GetAsync(new Uri(string.Format(WB_POPULATION_URL, sCountryISO3, iYear - i++)));
+                            if(rm.IsSuccessStatusCode) {
+                                JsonElement j = await JsonSerializer.DeserializeAsync<JsonElement>(await rm.Content.ReadAsStreamAsync());
+                                JsonElement v = j[1][0].EnumerateObject().FirstOrDefault(p => p.Name == "value").Value;
+                                if(v.ValueKind != JsonValueKind.Null) 
+                                    v.TryGetInt32(out iPopulation);
+                            } else
+                                throw new Exception($"Status code {rm.StatusCode}\n{await rm.Content.ReadAsStringAsync()}");
                         }
                     }
                     break;

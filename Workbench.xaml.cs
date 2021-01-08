@@ -36,8 +36,11 @@ namespace LogicLink.Corona {
         private Progress _pgr = new Progress();
         private System.Timers.Timer _tmr = new System.Timers.Timer(250);
         private bool _bUpdateReproduction = false;
+        private bool _bUpdateVaccination = false;
+        private bool _bManualVaccination = false;
 
         private Dictionary<DateTime, double> _dicReproduction;              // Dictionary of basic reproduction numbers (R₀) 
+        private Dictionary<DateTime, int> _dicVaccinated;                   // Dictionary of vaccinates individuals per day
 
         private bool _bUpdating = false;
 
@@ -49,26 +52,57 @@ namespace LogicLink.Corona {
                 try {
                     _pgr.Report(1, "Calculating basic reproduction numbers ...", true);
 
-                    SEIR seirR0 = new SEIR(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
-                    List<JHU.Record> l = await new JHU().GetDataAsync(vm.Country).ToListAsync();
+                    SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
+
+                    List<JHU.Record> lConfirmedRecords = await new JHU().GetDataAsync(vm.Country).ToListAsync();
+                    _pgr.Report(3);
+
+                    List<OWID.Record> lVaccinatedRecords = await new OWID().GetDataAsync(vm.Country).ToListAsync();
                     _pgr.Report(5);
 
-                    // Align confirmed numbers with model
-                    for(int i = 1; i <= (l[0].Date - vm.Start).Days; i++)
-                        seirR0.Calc(i);
-                    List<int> ll = l.Skip((vm.Start - l[0].Date).Days).Select(r => r.Confirmed).ToList();
+                    // Align model with confirmed numbers
+                    int iStartVacDif = (lVaccinatedRecords[0].Date - vm.Start).Days;
+                    int h;
+                    for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++) {
+                        h = i - iStartVacDif - 1;
+                        if(h >= 0 && h < lVaccinatedRecords.Count)
+                            seirvR0.Vaccinated = lVaccinatedRecords[h].Vaccinated;
+                        seirvR0.Calc(i);
+                    }
                     _pgr.Report(6);
 
-                    Progress pgrR0 = new Progress(7, 91);
+                    // Generate List of confirmed cases
+                    List<int> lConfirmed = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
+                    _pgr.Report(7);
+
+                    // Generate List of vaccinated individuals
+                    List<int> lVaccinated = new List<int>();
+
+                    // Add zero values for confirmed values before vaccination started
+                    for(int i = 0; i < (lVaccinatedRecords[0].Date - DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start)).Days; i++)
+                        lVaccinated.Add(0);
+
+                    // Add the overlapping date range
+                    int iVacConDif = (DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start) - lVaccinatedRecords[0].Date).Days;
+                    lVaccinated.AddRange(lVaccinatedRecords.Skip(iVacConDif)
+                                                           .Take(iVacConDif < 0 ? iVacConDif + lConfirmed.Count : lConfirmed.Count)
+                                                           .Select(r => r.Vaccinated));
+
+                    // Fill vaccinated list with last value until the number of confirmed is reached
+                    for(int i = 0; i < lConfirmed.Count - lVaccinated.Count; i++)
+                        lVaccinated.Add(lVaccinated[^1]);
+                    _pgr.Report(8);
+
+                    Progress pgrR0 = new Progress(9, 89);
                     pgrR0.Changed += _pgr_Changed;
 
                     // Create dictionary of R₀ values per date
                     _dicReproduction = new Dictionary<DateTime, double>();
                     int j = 0;
-                    DateTime dt = l[0].Date < vm.Start ? vm.Start : l[0].Date;
+                    DateTime dt = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
                     IR0Solver slr = vm.SolveR0 
-                                    ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = ll } as IR0Solver
-                                    : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = ll };
+                                    ? new SEIRVR0Solver(vm.SolveR0ResidualDayWindow) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated } as IR0Solver
+                                    : new SEIRVR0IntervalSolver(vm.SolveR0IntervalDays) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated };
                     foreach(double d in slr.Solve(pgrR0))
                         _dicReproduction.Add(dt.AddDays(j++), d);
 
@@ -85,12 +119,46 @@ namespace LogicLink.Corona {
                     pgrR0.Changed -= _pgr_Changed;
 
                     _pgr.Report(100);
-                } catch(Exception ex) {
-                    MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}");
-                    Close();
-                }
-            } else
+            } catch(Exception ex) {
+                MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+        } else
                 _dicReproduction = null;
+
+            _bUpdating = false;
+        }
+
+        private async Task UpdateVaccinationAsync(WorkbenchViewModel vm) {
+            _bUpdateVaccination = false;
+            _bUpdating = true;
+
+            try {
+                _pgr.Report(1, "Calculating vaccination numbers ...", true);
+
+                List<OWID.Record> l = await new OWID().GetDataAsync(vm.Country).ToListAsync();
+                _pgr.Report(30);
+                if(!_bManualVaccination && l.Count != 0) {                                                          // Calculate vaccination parameter from vaccinated values
+                    vm.VaccinationStart = l[0].Date;
+                    vm.DailyVaccinated = (int)Math.Round((double)l[^1].Vaccinated / l.Count);
+                }
+
+                if(vm.DailyVaccinated != 0 && vm.VaccinationStart >= vm.Start && vm.VaccinationStart <= vm.End) {   // Calculate vaccinated values per date
+                    _dicVaccinated = new Dictionary<DateTime, int>();
+                    int iVaccinated = vm.DailyVaccinated;
+                    for(DateTime dt = vm.VaccinationStart; dt <= vm.End; dt = dt.AddDays(1)) {
+                        _dicVaccinated.Add(dt, iVaccinated);
+                        iVaccinated += vm.DailyVaccinated;
+                        _pgr.Report(30 + (dt - vm.VaccinationStart).Days / (vm.End - vm.VaccinationStart).Days * 69);
+                    }
+                } else
+                    _dicVaccinated = null;
+
+                _pgr.Report(100);
+            } catch(Exception ex) {
+                MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
 
             _bUpdating = false;
         }
@@ -136,69 +204,85 @@ namespace LogicLink.Corona {
             try {
                 _pgr.Report(1, "Calculating chart series ...", true);
 
-                // 2. Calculate SEIR model and create series
-                ISEIR seir = new SEIR(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
+                // 1. Calculate SEIR model and create series
+                ISEIR seir = new SEIRV(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
                 IDateSeriesView vSeir = _dicReproduction == null
-                                        ? (IDateSeriesView) new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
-                                        : new SEIRR0DateSeriesView(seir, _dicReproduction, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker);
-                if(vm.ShowSusceptible || vm.ShowExposed || vm.ShowInfectious || vm.ShowRemoved || vm.ShowCases || vm.ShowDaily || vm.Show7Days || vm.ShowReproduction) {
+                                        ? _dicVaccinated == null 
+                                          ? new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
+                                          : new SEIRVDateSeriesView((ISEIRV)seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker, vm.ShowVaccinated, vm.ShowDailyVaccinated)
+                                        : _dicVaccinated == null 
+                                          ? new SEIRR0DateSeriesView(seir, _dicReproduction, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
+                                          : new SEIRVR0DateSeriesView((ISEIRV)seir, _dicReproduction, _dicVaccinated, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker, vm.ShowVaccinated, vm.ShowDailyVaccinated);
+                if(vm.ShowSusceptible || vm.ShowExposed || vm.ShowInfectious || vm.ShowRemoved || vm.ShowVaccinated || vm.ShowDailyVaccinated || vm.ShowCases || vm.ShowDaily || vm.Show7Days || vm.ShowReproduction) {
                     Progress pgrSeir = new Progress(2, 31);
                     pgrSeir.Changed += _pgr_Changed;
                     await vSeir.CalcAsync(vm.Start, vm.End, pgrSeir);
                     pgrSeir.Changed -= _pgr_Changed;
                 }
 
-                // 3. Get JHE data and create series
+                // 2. Get JHE data and create series
                 JHU jhu = new JHU();
                 JHUDateSeriesView vJhu = new JHUDateSeriesView(jhu, vm.Country, vm.Population, vm.ShowConfirmed, vm.ShowDailyConfirmed, vm.Show7DaysConfirmed, vm.ShowRecovered, vm.ShowDeaths);
                 if(vm.ShowConfirmed || vm.ShowDailyConfirmed  || vm.Show7DaysConfirmed || vm.ShowRecovered || vm.ShowDeaths) {
-                    Progress pgrJhu = new Progress(34, 30);
+                    Progress pgrJhu = new Progress(34, 19);
                     pgrJhu.Changed += _pgr_Changed;
                     await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
                     pgrJhu.Changed -= _pgr_Changed;
                 }
 
-                // 3. Get RKI nowcasting data and create series
+                // 3. Get OWID data and create series
+                OWID owid = new OWID();
+                OWIDDateSeriesView vOwid = new OWIDDateSeriesView(owid, vm.Country, vm.ShowConfirmedVaccinated, vm.ShowDailyConfirmedVaccinated);
+                if(vm.ShowConfirmedVaccinated || vm.ShowDailyConfirmedVaccinated) {
+                    Progress pgrOwd = new Progress(54, 10);
+                    pgrOwd.Changed += _pgr_Changed;
+                    await vOwid.CalcAsync(vm.Start, vm.End, pgrOwd);
+                    pgrOwd.Changed -= _pgr_Changed;
+                }
+
+                // 4. Get RKI nowcasting data and create series
                 RKINowcasting rnc = new RKINowcasting();
                 RKINowcastingDateSeriesView vRnc = new RKINowcastingDateSeriesView(rnc, vm.ShowNowcasting, vm.ShowNowcasting7Day);
                 if(vm.ShowNowcasting || vm.ShowNowcasting7Day) {
-                    Progress pgrRnc = new Progress(65, 30);
+                    Progress pgrRnc = new Progress(65, 29);
                     pgrRnc.Changed += _pgr_Changed;
                     await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
                     pgrRnc.Changed -= _pgr_Changed;
                 }
 
-                // 4. Update Title
+                // 5. Update Title
                 cht.Titles[0].Text = vm.Country;
 
-                // 5. Add strip lines for weekend
+                // 6. Add strip lines for weekend
                 cht.ChartAreas[0].AxisX.StripLines.Clear();
                 cht.ChartAreas[0].AxisX.StripLines.Add(new StripLine { IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
                                                                        Interval = 7,
                                                                        StripWidth = 2,
                                                                        BackColor = Color.FromArgb(247, 247, 247) });
 
-                // 6. Show available series
+                // 7. Show available series
                 cht.Series.Clear();
-                _pgr.Report(96);
+                _pgr.Report(95);
                 cht.Series.Add(vSeir);
-                _pgr.Report(97);
-                cht.Series.Add(vRnc);
-                _pgr.Report(98);
+                _pgr.Report(96);
                 cht.Series.Add(vJhu);
+                _pgr.Report(97);
+                cht.Series.Add(vOwid);
+                _pgr.Report(98);
+                cht.Series.Add(vRnc);
                 _pgr.Report(99);
 
                 cht.ChartAreas[0].RecalculateAxesScale();
 
                 _pgr.Report(100);
 
-                // 7. Add Legend
+                // 8. Add Legend
                 cht.Legends.Clear();
                 cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
             
                 _pgr.Report(100, "Ready", false);
             } catch(Exception ex) {
-                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}");
+                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
             _bUpdating = false;
@@ -212,7 +296,14 @@ namespace LogicLink.Corona {
         /// <remarks>
         /// Use data from previous year as data for the current year might not exist.
         /// </remarks> 
-        private async Task UpdatePopulationAsync(WorkbenchViewModel vm) => vm.Population = await new WPPopulation().GetDataAsync(vm.Country, DateTime.Today.Year - 1);
+        private async Task UpdatePopulationAsync(WorkbenchViewModel vm) {
+            try {
+                vm.Population = await new WPPopulation().GetDataAsync(vm.Country, vm.Start.Year);
+            } catch(Exception ex) {
+                MessageBox.Show($"World Bank population data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+        }
 
         /// <summary>
         /// Updates the initial number infectious individuals from Johns Hopkins University data. Minimum is 1.
@@ -256,14 +347,21 @@ namespace LogicLink.Corona {
                 try {
                     await new JHU().LoadAsync();
                 } catch(Exception ex) {
-                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}");
+                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
                 }
-            }), DispatcherPriority.Background);
+                try {
+                    await new OWID().LoadAsync();
+                } catch(Exception ex) {
+                    MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }
+        }), DispatcherPriority.Background);
 
             InitChart();
             Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(vm.SolveR0 || vm.SolveR0Interval)
                                                                                             await UpdateReproductionAsync(vm);
+                                                                                         await UpdateVaccinationAsync(vm);
                                                                                          await UpdateChartAsync(vm); 
                                                                                         }));
         }
@@ -286,9 +384,7 @@ namespace LogicLink.Corona {
             pbr.Dispatcher.Invoke(delegate () { }, DispatcherPriority.Background);
         }
 
-        private void btnData_Click(object sender, RoutedEventArgs e) {
-            new Data(cht.ToDataTable()).ShowDialog();
-        }
+        private void btnData_Click(object sender, RoutedEventArgs e) => new Data(cht.ToDataTable()).ShowDialog();
 
         private void btnExport_Click(object sender, RoutedEventArgs e) {
             if(!(this.DataContext is WorkbenchViewModel vm)) return;
@@ -341,14 +437,20 @@ namespace LogicLink.Corona {
             if(!(this.DataContext is WorkbenchViewModel vm)) return;
 
             _bUpdateReproduction = true;
+            _bUpdateVaccination = true;
+
             vm.Reset();
+            _bManualVaccination = false;
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e) {
             if(!(this.DataContext is WorkbenchViewModel vm)) return;
 
             _bUpdateReproduction = true;
+            _bUpdateVaccination = true;
+
             vm.Clear();
+            _bManualVaccination = false;
         }
 
         #endregion
@@ -453,6 +555,8 @@ namespace LogicLink.Corona {
                 _tmr.Stop();
                 Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(_bUpdateReproduction)
                                                                                                 await UpdateReproductionAsync(this.DataContext as WorkbenchViewModel);
+                                                                                             if(_bUpdateVaccination)
+                                                                                                await UpdateVaccinationAsync(this.DataContext as WorkbenchViewModel);
                                                                                              await UpdateChartAsync(this.DataContext as WorkbenchViewModel); 
                                                                                            }));
             }
@@ -472,6 +576,8 @@ namespace LogicLink.Corona {
                                                                                                  await UpdateInfectiousAsync(vm);
                                                                                                  _bUpdating = false;
                                                                                                  _bUpdateReproduction = true;
+                                                                                                 _bManualVaccination = false;
+                                                                                                 _bUpdateVaccination = true;
                                                                                                  _tmr.Start();
                                                                                                }));
                     break;
@@ -494,15 +600,26 @@ namespace LogicLink.Corona {
                 case nameof(WorkbenchViewModel.SolveR0Interval):
                 case nameof(WorkbenchViewModel.SolveR0ResidualDayWindow):
                 case nameof(WorkbenchViewModel.SolveR0IntervalDays):
+                case nameof(WorkbenchViewModel.Effectiveness):
                     _bUpdateReproduction = true;
+                    _bUpdateVaccination = true;
                     _tmr.Start();
                     break;
 
                 case nameof(WorkbenchViewModel.Reproduction):
                     if(!_bUpdating)
                         _tmr.Start();
-                    break;                
-                
+                    break;
+
+                case nameof(WorkbenchViewModel.DailyVaccinated):
+                case nameof(WorkbenchViewModel.VaccinationStart):
+                    if(!_bUpdating) {
+                        _bUpdateVaccination = true;
+                        _bManualVaccination = true;
+                        _tmr.Start();
+                    }
+                    break;
+
                 default:
                     _tmr.Start();
                     break;

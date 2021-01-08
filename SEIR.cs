@@ -8,7 +8,7 @@ namespace LogicLink.Corona {
     /// </summary>
     public class SEIR : ISEIR {
 
-        #region Private Static Compartment Functions
+        #region Protected Static Compartment Functions
 
         /// <summary>
         /// Daily number of individuals moving from S(usceptible) to E(xposed) compartment
@@ -17,9 +17,9 @@ namespace LogicLink.Corona {
         /// <param name="dInfectious">Number of individuals in the I(nfectious) compartment.</param>
         /// <param name="iPopulation">Total number of indivisuals in all compartments.</param>
         /// <param name="tsInfectiousPeriod">Timespan in which an individual is infectious.</param>
-        /// <param name="dReproduction">Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"</param>
+        /// <param name="dReproduction">Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune.</param>
         /// <returns>Number of individuals</returns>
-        private static double dΔSusceptibleToExposed(double dSusceptible, double dInfectious, int iPopulation, TimeSpan tsInfectiousPeriod, double dReproduction) {
+        protected static double dΔSusceptibleToExposed(double dSusceptible, double dInfectious, int iPopulation, TimeSpan tsInfectiousPeriod, double dReproduction) {
             return (dSusceptible / iPopulation) * (dReproduction / tsInfectiousPeriod.TotalDays) * dInfectious;
         }
 
@@ -29,7 +29,7 @@ namespace LogicLink.Corona {
         /// <param name="dExposed">Number of individuals in the E(xposed) compartment.</param>
         /// <param name="tsIncubationPeriod">Timespan in which an individual is infected but not infectious.</param>
         /// <returns>Number of individuals</returns>
-        private static double dΔExposedToInfectious(double dExposed, TimeSpan tsIncubationPeriod) {
+        protected static double dΔExposedToInfectious(double dExposed, TimeSpan tsIncubationPeriod) {
             return dExposed / tsIncubationPeriod.TotalDays;
         }
 
@@ -39,19 +39,19 @@ namespace LogicLink.Corona {
         /// <param name="dInfectious">Number of individuals in the I(nfectious) compartment.</param>
         /// <param name="tsInfectiousPeriod">Timespan in which an individual is infectious.</param>
         /// <returns>Number of individuals</returns>
-        private static double dΔInfectiousToRemoved(double dInfectious, TimeSpan tsInfectiousPeriod) {
+        protected static double dΔInfectiousToRemoved(double dInfectious, TimeSpan tsInfectiousPeriod) {
             return dInfectious / tsInfectiousPeriod.TotalDays;
         }
 
         #endregion
 
-        #region Private Variables
-        private int _iPopulation;           // Total number of indivisuals in all compartmens
+        #region Protected Variables
+        protected int _iPopulation;           // Total number of indivisuals in all compartmens
 
-        private double _dSusceptible;       // Number of individuals in the S(usceptible) compartment
-        private double _dExposed;           // Number of individuals in the E(xposed) compartment
-        private double _dInfectious;        // Number of individuals in the I(nfectious) compartment
-        private double _dRemoved;           // Number of individuals in the R(emoved) compartment
+        protected double _dSusceptible;       // Number of individuals in the S(usceptible) compartment
+        protected double _dExposed;           // Number of individuals in the E(xposed) compartment
+        protected double _dInfectious;        // Number of individuals in the I(nfectious) compartment
+        protected double _dRemoved;           // Number of individuals in the R(emoved) compartment
 
         #endregion
 
@@ -66,7 +66,7 @@ namespace LogicLink.Corona {
         /// <param name="tsInfectiousPeriod">Timespan in which an individual is infectious.</param>
         /// <param name="dReproduction">Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"</param>
         /// <remarks>
-        /// The population is the total number of all individuals in all compartments. In this case it's S(usceptible) + I(nfectious). 
+        /// The population is the total number of all individuals in all SEIR compartments. In this case it's S(usceptible) + I(nfectious). 
         /// </remarks>
         public SEIR(int iSusceptible, int iInfectious, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction) {
             _iPopulation = iSusceptible + iInfectious;
@@ -90,7 +90,7 @@ namespace LogicLink.Corona {
         /// <param name="tsInfectiousPeriod">Timespan in which an individual is infectious.</param>
         /// <param name="dReproduction">Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"</param>
         /// <remarks>
-        /// The population is the total number of all individuals in all compartments. In this case it's S(usceptible) + E(xposed) + I(nfectious) +R(emoved). 
+        /// The population is the total number of all individuals in all SEIR compartments. In this case it's S(usceptible) + E(xposed) + I(nfectious) +R(emoved). 
         /// </remarks>
         public SEIR(int iSusceptible, int iExposed, int iInfectious, int iRemoved, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction) : this(iSusceptible, iInfectious, tsIncubationPeriod, tsInfectiousPeriod, dReproduction)  {
             _iPopulation += iExposed + iRemoved;
@@ -120,7 +120,7 @@ namespace LogicLink.Corona {
         public TimeSpan InfectiousPeriod { get; set; }
 
         /// <summary>
-        /// Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"
+        /// Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune.
         /// </summary>
         public double Reproduction { get; set; }
 
@@ -155,7 +155,7 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Day for which the numbers of individuals in all campartments were calculated
         /// </summary>
-        public int Day { get; private set; } = 0;
+        public int Day { get; protected set; } = 0;
 
         #endregion
 
@@ -165,7 +165,7 @@ namespace LogicLink.Corona {
         /// Calculates the number of individuals in all compartments for a day 
         /// </summary>
         /// <param name="iDay">Day to calculate. Has to be larger than <see cref="Day"/>.</param>
-        public void Calc(int iDay) {
+        public virtual void Calc(int iDay) {
             for(int i = this.Day; i < iDay; i++) {
                 double dSusceptible = _dSusceptible;
                 double dExposed = _dExposed;

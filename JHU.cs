@@ -28,7 +28,7 @@ namespace LogicLink.Corona {
             /// <summary>
             /// Factory method for parsing a row into a record.
             /// </summary>
-            /// <param name="s">Row of teh CSV file</param>
+            /// <param name="s">Row of the CSV file</param>
             /// <param name="sCountryPrevious">Country of the previous row for decission if a new country starts.</param>
             /// <param name="iConfirmedPrevious">Number of confirmed cases of the previous row.</param>
             /// <returns>Tuple of country string and record</returns>
@@ -40,7 +40,7 @@ namespace LogicLink.Corona {
                 DateTime dtDate = DateTime.Parse(sp.Slice(i, j), CultureInfo.InvariantCulture);
                 i += j + 1;
 
-                j = sp.Slice(i).QuotedIndexOf(',');
+                j = sp[i..].QuotedIndexOf(',');
                 string sCountry = sp[i] == '"'
                                   ? sp[i + j - 1] == '"'
                                     ? new string(sp.Slice(i + 1, j - 2))
@@ -48,15 +48,15 @@ namespace LogicLink.Corona {
                                   : new string(sp.Slice(i, j));
                 i += j + 1;
 
-                j = sp.Slice(i).QuotedIndexOf(',');
+                j = sp[i..].QuotedIndexOf(',');
                 int iConfirmed = int.Parse(sp.Slice(i, j));
                 i += j + 1;
 
-                j = sp.Slice(i).QuotedIndexOf(',');
+                j = sp[i..].QuotedIndexOf(',');
                 int iRecovered = int.Parse(sp.Slice(i, j));
                 i += j + 1;
 
-                int iDeaths = int.Parse(sp.Slice(i));
+                int iDeaths = int.Parse(sp[i..]);
 
                 return (sCountry, new Record(dtDate, iConfirmed, sCountry == sCountryPrevious ? iConfirmed - iConfirmedPrevious : 0, iRecovered, iDeaths));
             }
@@ -126,13 +126,11 @@ namespace LogicLink.Corona {
                                 (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Confirmed);
                                 if(dic.TryGetValue(s, out List<Record> l))
                                     l.Add(r);
-                                else {
-                                    l = new List<Record>();
-                                    l.Add(r);
-                                    dic[s] = l;
-                                }
-                            }
+                                else
+                                    dic[s] = new List<Record> { r };
+
                         }
+                    }
                         _dic = dic;
                     } finally {
                         _sms.Release();
@@ -148,6 +146,10 @@ namespace LogicLink.Corona {
         public async IAsyncEnumerable<Record> GetDataAsync(string sCountry) {
             if(_dic == null)
                 await LoadAsync();
+
+            if(!_dic.ContainsKey(sCountry))
+                yield break;
+
             foreach(Record r in _dic[sCountry])
                 yield return r;
         }

@@ -9,21 +9,11 @@ using System.Windows.Forms.DataVisualization.Charting;
 namespace LogicLink.Corona {
 
     /// <summary>
-    /// Charting series view of a SEIR object. X-axis is a time range.
+    /// Charting series view of a SEIRV object. X-axis is a time range.
     /// </summary>
-    public class SEIRDateSeriesView : IDateSeriesView {
-        protected readonly ISEIR _seir;             // SEIR-object
-
-        protected readonly Series _serSusceptible;  // Series of the number of individuals in the S(usceptible) compartment
-        protected readonly Series _serExposed;      // Series of the number of individuals in the E(xposed) compartment
-        protected readonly Series _serInfectious;   // Series of the number of individuals in the I(nfectious) compartment
-        protected readonly Series _serRemoved;      // Series of the number of individuals in the R(emoved) compartment
-        protected readonly Series _serCases;        // Series of the total number of confirmed infected individuals ( Number of E(xposed) + I(nfectious) + R(emoved) )
-        protected readonly Series _serDaily;        // Series of the number of confirmed infected individuals for the day ( Cases - Cases of the previous day )
-        protected readonly Series _ser7Days;        // Series of the 7 day average of daily cases per 100.000 individuals
-        protected readonly Series _serReproduction; // Series of the basic reproduction number (R₀)
-
-        protected readonly bool _bDoubledMarker;    // If true, double value diamond markers are added to cases-, daily- and 7days-series
+    public class SEIRVDateSeriesView : SEIRDateSeriesView {
+        private readonly Series _serVaccinated;         // Series of the number of individuals in the V(accinated) compartment
+        private readonly Series _serDailyVaccinated;    // Series of the number of vaccinated individuals for the day ( Vaccinated - Vaccinated of the previous day )
 
         /// <summary>
         /// Creates and initializes a new view object
@@ -38,59 +28,20 @@ namespace LogicLink.Corona {
         /// <param name="b7Days">If true, 7 day average of daily cases per 100.000-series is shown.</param>
         /// <param name="bReproduction">If true, R₀-series is shown for the second axis</param>
         /// <param name="bDoubledMarker">If true, double value diamond markers are added to cases-, daily- and 7days-series</param>
-        public SEIRDateSeriesView(ISEIR seir, bool bSusceptible = true, bool bExposed = true, bool bInfectious = true, bool bRemoved = true, bool bCases = true, bool bDaily = true, bool b7Days = true, bool bReproduction = true, bool bDoubledMarker = true) {
-            _seir = seir;
-
-            if(bSusceptible)
-                _serSusceptible = new Series("Susceptible") { ChartType = SeriesChartType.Spline,
-                                                              XValueType = ChartValueType.Date,
-                                                              Color = Color.LightSkyBlue,
-                                                              BorderWidth = 5 };
-
-            if(bExposed)
-                _serExposed = new Series("Exposed") { ChartType = SeriesChartType.Spline,
-                                                      XValueType = ChartValueType.Date,
-                                                      Color = Color.Orange,
-                                                      BorderWidth = 5 };
-
-            if(bInfectious)
-                _serInfectious = new Series("Infectious") { ChartType = SeriesChartType.Spline,
+        /// <param name="bVaccinated">If true, vaccinated-series is shown</param>
+        /// <param name="bDailyVaccinated">If true, daily vaccinated-series is shown</param>
+        public SEIRVDateSeriesView(ISEIRV seirv, bool bSusceptible = true, bool bExposed = true, bool bInfectious = true, bool bRemoved = true, bool bCases = true, bool bDaily = true, bool b7Days = true, bool bReproduction = true, bool bDoubledMarker = true, bool bVaccinated = true, bool bDailyVaccinated = true) : base (seirv, bSusceptible, bExposed, bInfectious, bRemoved, bCases, bDaily, b7Days, bReproduction, bDoubledMarker) {
+            if(bVaccinated)
+                _serVaccinated = new Series("Vaccinated") { ChartType = SeriesChartType.Spline,
                                                             XValueType = ChartValueType.Date,
-                                                            Color = Color.Red,
+                                                            Color = Color.Green,
                                                             BorderWidth = 5 };
 
-            if(bRemoved)
-                _serRemoved = new Series("Removed") { ChartType = SeriesChartType.Spline,
-                                                      XValueType = ChartValueType.Date,
-                                                      Color = Color.LimeGreen,
-                                                      BorderWidth = 5 };
-
-            if(bCases)
-                _serCases = new Series("Cases") { ChartType = SeriesChartType.Spline,
-                                                  XValueType = ChartValueType.Date,
-                                                  Color = Color.Yellow,
-                                                  BorderWidth = 5 };
-
-            if(bDaily)
-                _serDaily = new Series("Daily Cases") { ChartType = SeriesChartType.Column,
-                                                        XValueType = ChartValueType.Date,
-                                                        Color = Color.Yellow,
-                                                        BorderWidth = 5 };
-
-            if(b7Days)
-                _ser7Days = new Series("7 Days Incidence") { ChartType = SeriesChartType.Column,
-                                                             XValueType = ChartValueType.Date,
-                                                             Color = Color.Goldenrod,
-                                                             BorderWidth = 5 };
-
-            if(bReproduction)
-                _serReproduction = new Series("Reproduction R₀") { ChartType = SeriesChartType.Spline,
-                                                                   YAxisType = AxisType.Secondary,
-                                                                   XValueType = ChartValueType.Date,
-                                                                   Color = Color.FromArgb(128, 128, 128),
-                                                                   BorderWidth = 5 };
-
-            _bDoubledMarker = bDoubledMarker;
+            if(bDailyVaccinated)
+                _serDailyVaccinated = new Series("Daily Vaccinated") { ChartType = SeriesChartType.Column,
+                                                                       XValueType = ChartValueType.Date,
+                                                                       Color = Color.Green,
+                                                                       BorderWidth = 5 };
         }
 
         /// <summary>
@@ -100,7 +51,7 @@ namespace LogicLink.Corona {
         /// <param name="dtEnd">End date of teh time range</param>
         /// <param name="p">Optional progress object</param>
         /// <returns>Awaitable task.</returns>
-        public async virtual Task CalcAsync(DateTime dtStart, DateTime dtEnd, IProgress<int> p = null) {
+        public override async Task CalcAsync(DateTime dtStart, DateTime dtEnd, IProgress<int> p = null) {
             int iPCount = 0;
             int iTotalDays = (dtEnd - dtStart).Days;
             int iPopulation = _seir.Susceptible + _seir.Exposed + _seir.Infectious + _seir.Removed;
@@ -110,6 +61,7 @@ namespace LogicLink.Corona {
             int i7DaysToday = 0;
             for(DateTime dt = dtStart.AddDays(1d); dt <= dtEnd; dt = dt.AddDays(1d)) {
                 int iCases = _seir.Exposed + _seir.Infectious + _seir.Removed;
+                int iVaccinated = ((ISEIRV)_seir).Vaccinated;
                 int iDays = (dt - dtStart).Days;
 
                 _seir.Calc(iDays);
@@ -157,7 +109,13 @@ namespace LogicLink.Corona {
 
                 if(_serReproduction != null)
                     _serReproduction.Points.AddXY(dt, _seir.Reproduction);
-                
+
+                if(_serVaccinated != null)
+                    _serVaccinated.Points.AddXY(dt, ((ISEIRV)_seir).Vaccinated);
+
+                if(_serDailyVaccinated != null)
+                    _serDailyVaccinated.Points.AddXY(dt, Math.Max(((ISEIRV)_seir).Vaccinated - iVaccinated, 0));
+
                 if(_bDoubledMarker && dt == DateTime.Today) {
                     iCasesToday = _seir.Exposed + _seir.Infectious + _seir.Removed;
                     iDailyToday = Math.Max(_seir.Exposed + _seir.Infectious + _seir.Removed - iCases, 0);
@@ -178,30 +136,17 @@ namespace LogicLink.Corona {
         /// Enumerates charting series
         /// </summary>
         /// <returns>Enumerable of charting series</returns>
-        public virtual IEnumerator<Series> GetEnumerator() {
-            if(_serSusceptible != null)
-                yield return _serSusceptible;
-            if(_serExposed != null)
-                yield return _serExposed;
-            if(_serInfectious != null)
-                yield return _serInfectious;
-            if(_serRemoved != null)
-                yield return _serRemoved;
-            if(_serCases != null)
-                yield return _serCases;
-            if(_serDaily != null)
-                yield return _serDaily;
-            if(_ser7Days != null)
-                yield return _ser7Days;
-            if(_serReproduction != null)
-                yield return _serReproduction;
+        public override IEnumerator<Series> GetEnumerator() {
+            IEnumerator<Series> e = base.GetEnumerator();
+            while(e.MoveNext())
+                yield return e.Current;
+
+            if(_serVaccinated != null)
+                yield return _serVaccinated;
+            if(_serDailyVaccinated != null)
+                yield return _serDailyVaccinated;
         }
 
-        /// <summary>
-        /// Untyped version of the typed enumerator
-        /// </summary>
-        /// <returns>Enumerable of object</returns>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         #endregion
     }
 }

@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Title="Corona SEIR Workbench" 
         Icon="Corona.ico"
-        Height="700" Width="900"
+        Height="900" Width="1024"
         Loaded="Workbench_Loaded">
     <Window.DataContext>
         <local:WorkbenchViewModel /> 
@@ -34,6 +34,17 @@
             <Setter Property="Width" Value="{StaticResource FieldWidth}" />
         </Style>
 
+        <SolidColorBrush x:Key="HorizontalRulePathBrush" Color="#FFD5DFE5" />
+
+        <Style TargetType="{x:Type Path}" x:Key="HorizontalRulePathStyle">
+            <Setter Property="Margin" Value="10,4,4,4" />
+            <Setter Property="Stroke" Value="{StaticResource HorizontalRulePathBrush}" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Data" Value="M0,0 1,0Z" />
+            <Setter Property="Stretch" Value="Fill" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        
     </Window.Resources>
     
     <Grid Margin="3" Grid.IsSharedSizeScope="True">
@@ -83,7 +94,11 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <GroupBox         Grid.Column="0" x:Name="gbxViewSEIR" Header="SEIR">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <GroupBox         Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" x:Name="gbxViewSEIR" Header="SEIR">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -95,21 +110,25 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <CheckBox         Grid.Column="0" Grid.Row="0" Content="Susceptible" IsChecked="{Binding ShowSusceptible}" />
-                    <CheckBox         Grid.Column="0" Grid.Row="1" Content="Exposed" IsChecked="{Binding ShowExposed}" />
-                    <CheckBox         Grid.Column="0" Grid.Row="2" Content="Infectious" IsChecked="{Binding ShowInfectious}" />
-                    <CheckBox         Grid.Column="0" Grid.Row="3" Content="Removed" IsChecked="{Binding ShowRemoved}" />
-                    <CheckBox         Grid.Column="0" Grid.Row="4" Content="Cases" IsChecked="{Binding ShowCases}" />
+                    <!--Content="Susceptible"-->
+                    <CheckBox         Grid.Column="0" Grid.Row="0" IsChecked="{Binding ShowSusceptible}"><TextBlock><Underline>S</Underline>usceptible</TextBlock></CheckBox>
+                    <CheckBox         Grid.Column="0" Grid.Row="1" IsChecked="{Binding ShowExposed}"><TextBlock><Underline>E</Underline>xposed</TextBlock></CheckBox>
+                    <CheckBox         Grid.Column="0" Grid.Row="2" IsChecked="{Binding ShowInfectious}"><TextBlock><Underline>I</Underline>nfectious</TextBlock></CheckBox>
+                    <CheckBox         Grid.Column="0" Grid.Row="3" IsChecked="{Binding ShowRemoved}"><TextBlock><Underline>R</Underline>emoved</TextBlock></CheckBox>
+                    <CheckBox         Grid.Column="0" Grid.Row="4" IsChecked="{Binding ShowVaccinated}"><TextBlock><Underline>V</Underline>accinated</TextBlock></CheckBox>
+                    <CheckBox         Grid.Column="0" Grid.Row="5" Content="Daily Vaccinated" IsChecked="{Binding ShowDailyVaccinated}" />
                     
-                    <CheckBox         Grid.Column="1" Grid.Row="0" Content="Daily" IsChecked="{Binding ShowDaily}" />
-                    <CheckBox         Grid.Column="1" Grid.Row="1" Content="7 Days Incidence" IsChecked="{Binding Show7Days}" />
-                    <CheckBox         Grid.Column="1" Grid.Row="3" Content="Reproduction R₀" IsChecked="{Binding ShowReproduction}" />
-                    <CheckBox         Grid.Column="1" Grid.Row="4" Content="&#x25c7; Marker for doubled cases" IsChecked="{Binding ShowDoubledMarker}" />
+                    <CheckBox         Grid.Column="1" Grid.Row="0" Content="Cases" IsChecked="{Binding ShowCases}" />
+                    <CheckBox         Grid.Column="1" Grid.Row="1" Content="Daily" IsChecked="{Binding ShowDaily}" />
+                    <CheckBox         Grid.Column="1" Grid.Row="2" Content="7 Days Incidence" IsChecked="{Binding Show7Days}" />
+                    <CheckBox         Grid.Column="1" Grid.Row="4" Content="Reproduction R₀" IsChecked="{Binding ShowReproduction}" />
+                    <CheckBox         Grid.Column="1" Grid.Row="5" Content="&#x25c7; Marker for doubled cases" IsChecked="{Binding ShowDoubledMarker}" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox         Grid.Column="1" Header="Johns Hopkins University">
+            <GroupBox         Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Header="Johns Hopkins University">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -128,8 +147,8 @@
                     <CheckBox         Grid.Column="0" Grid.Row="4" Content="Deaths" IsChecked="{Binding ShowDeaths}" />
                 </Grid>
             </GroupBox>
-        
-            <GroupBox         Grid.Column="2" Header="Robert Koch Institut">
+
+            <GroupBox         Grid.Column="2" Grid.Row="0" Header="Robert Koch Institut">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -142,62 +161,80 @@
                     <CheckBox         Grid.Column="0" Grid.Row="1" Content="Nowcasting 7-Day-R₀" IsChecked="{Binding ShowNowcasting7Day}" />
                 </Grid>
             </GroupBox>
+
+            <GroupBox         Grid.Column="2" Grid.Row="1" Header="Our World in Data">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <CheckBox         Grid.Column="0" Grid.Row="0" Content="Vaccinated" IsChecked="{Binding ShowConfirmedVaccinated}" />
+                    <CheckBox         Grid.Column="0" Grid.Row="1" Content="Daily Vaccinated" IsChecked="{Binding ShowDailyConfirmedVaccinated}" />
+                </Grid>
+            </GroupBox>
         </Grid>
+
+        <Path             Grid.Column="0" Grid.Row="2"  Grid.ColumnSpan="6" Style="{StaticResource HorizontalRulePathStyle}" />
         
-        <Label            Grid.Column="0" Grid.Row="2" Content="Country" Target="{Binding ElementName=cmbCountry}" />
-        <ComboBox         Grid.Column="1" Grid.Row="2" x:Name="cmbCountry"
+        <Label            Grid.Column="0" Grid.Row="3" Content="Country" Target="{Binding ElementName=cmbCountry}" />
+        <ComboBox         Grid.Column="1" Grid.Row="3" x:Name="cmbCountry"
                           SelectedItem="{Binding Country, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true }"
                           ItemsSource="{Binding Countries, Source={x:Static local:Settings.Default}}" />
 
-        <Label            Grid.Column="2" Grid.Row="2" Content="Population" Target="{Binding ElementName=txtPopulation}" Style="{StaticResource RightLabelStyle}" />
-        <TextBox          Grid.Column="3" Grid.Row="2" x:Name="txtPopulation"
+        <Label            Grid.Column="2" Grid.Row="3" Content="Population" Target="{Binding ElementName=txtPopulation}" Style="{StaticResource RightLabelStyle}" />
+        <TextBox          Grid.Column="3" Grid.Row="3" x:Name="txtPopulation"
                           Text="{Binding Population, StringFormat={}{0:N0}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           Style="{StaticResource NumericTextBoxStyle}" />
 
-        <Label            Grid.Column="4" Grid.Row="2" Content="Infectious" Target="{Binding ElementName=txtInfectious}"  Style="{StaticResource RightLabelStyle}" />
-        <TextBox          Grid.Column="5" Grid.Row="2" x:Name="txtInfectious"
+        <Label            Grid.Column="4" Grid.Row="3" Content="Infectious" Target="{Binding ElementName=txtInfectious}"  Style="{StaticResource RightLabelStyle}" />
+        <TextBox          Grid.Column="5" Grid.Row="3" x:Name="txtInfectious"
                           Text="{Binding Infectious, StringFormat={}{0:N0}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           Style="{StaticResource NumericTextBoxStyle}" />
 
-        <Label            Grid.Column="0" Grid.Row="3" Content="Start" Target="{Binding ElementName=dtpStart}" />
-        <DatePicker       Grid.Column="1" Grid.Row="3" x:Name="dtpStart"
+        <Label            Grid.Column="0" Grid.Row="4" Content="Start" Target="{Binding ElementName=dtpStart}" />
+        <DatePicker       Grid.Column="1" Grid.Row="4" x:Name="dtpStart"
                           SelectedDate="{Binding Start, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           Style="{StaticResource DatePickerStyle}" />
 
-        <Label            Grid.Column="2" Grid.Row="3" Content="End" Target="{Binding ElementName=dtpEnd}"  Style="{StaticResource RightLabelStyle}" />
-        <DatePicker       Grid.Column="3" Grid.Row="3" x:Name="dtpEnd"
+        <Label            Grid.Column="2" Grid.Row="4" Content="End" Target="{Binding ElementName=dtpEnd}"  Style="{StaticResource RightLabelStyle}" />
+        <DatePicker       Grid.Column="3" Grid.Row="4" x:Name="dtpEnd"
                           SelectedDate="{Binding End, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
                           Style="{StaticResource DatePickerStyle}" />
 
-        <Label            Grid.Column="0" Grid.Row="4" Content="Incubation Period" Target="{Binding ElementName=txtIncubationPeriod}" />
-        <TextBox          Grid.Column="1" Grid.Row="4" x:Name="txtIncubationPeriod"
+        <Label            Grid.Column="0" Grid.Row="5" Content="Incubation Period" Target="{Binding ElementName=txtIncubationPeriod}" />
+        <TextBox          Grid.Column="1" Grid.Row="5" x:Name="txtIncubationPeriod"
                           Text="{Binding Value, ElementName=slIncubationPeriod, StringFormat={}{0:N1}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
                           Style="{StaticResource NumericTextBoxStyle}" />
-        <Slider           Grid.Column="2" Grid.Row="4" Grid.ColumnSpan="4" x:Name="slIncubationPeriod"
+        <Slider           Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="4" x:Name="slIncubationPeriod"
                           Value="{Binding IncubationPeriod, Converter={x:Static local:TimeSpanToDaysDoubleConverter.Instance}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           TickPlacement="BottomRight" IsSnapToTickEnabled="True" TickFrequency=".1" Maximum="10" 
                           AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="1" />
 
-        <Label            Grid.Column="0" Grid.Row="5" Content="Infectious Period" Target="{Binding ElementName=txtInfectiousPeriod}" />
-        <TextBox          Grid.Column="1" Grid.Row="5" x:Name="txtInfectiousPeriod"
+        <Label            Grid.Column="0" Grid.Row="6" Content="Infectious Period" Target="{Binding ElementName=txtInfectiousPeriod}" />
+        <TextBox          Grid.Column="1" Grid.Row="6" x:Name="txtInfectiousPeriod"
                           Text="{Binding Value, ElementName=slInfectiousPeriod, StringFormat={}{0:N1}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
                           Style="{StaticResource NumericTextBoxStyle}" />
-        <Slider           Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="4" x:Name="slInfectiousPeriod"
+        <Slider           Grid.Column="2" Grid.Row="6" Grid.ColumnSpan="4" x:Name="slInfectiousPeriod"
                           Value="{Binding InfectiousPeriod, Converter={x:Static local:TimeSpanToDaysDoubleConverter.Instance}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           TickPlacement="BottomRight" IsSnapToTickEnabled="True" TickFrequency=".1" Maximum="10" 
                           AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="1" />
+        
+        <Path             Grid.Column="0" Grid.Row="7"  Grid.ColumnSpan="6" Style="{StaticResource HorizontalRulePathStyle}" />
 
-        <Label            Grid.Column="0" Grid.Row="6" Content="Basic Reproduction Number (R₀)" Target="{Binding ElementName=txtReproduction}" />
-        <TextBox          Grid.Column="1" Grid.Row="6" x:Name="txtReproduction"
-                          Text="{Binding Value, ElementName=slReproduction, StringFormat={}{0:N1}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
+        <Label            Grid.Column="0" Grid.Row="8" Content="Basic Reproduction Number (R₀)" Target="{Binding ElementName=txtReproduction}" />
+        <TextBox          Grid.Column="1" Grid.Row="8" x:Name="txtReproduction"
+                          Text="{Binding Value, ElementName=slReproduction, StringFormat={}{0:N2}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                           Style="{StaticResource NumericTextBoxStyle}" />
-        <Slider           Grid.Column="2" Grid.Row="6" Grid.ColumnSpan="4" x:Name="slReproduction"
+        <Slider           Grid.Column="2" Grid.Row="8" Grid.ColumnSpan="4" x:Name="slReproduction"
                           Value="{Binding Reproduction, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
-                          TickPlacement="BottomRight" IsSnapToTickEnabled="True" TickFrequency=".1" Maximum="10"
-                          AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="1" />
+                          TickPlacement="BottomRight" IsSnapToTickEnabled="True" TickFrequency=".01" Maximum="10"
+                          AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="2" />
 
-        <CheckBox         Grid.Column="1" Grid.Row="7" Content="Calc R₀ from JHE:" IsChecked="{Binding SolveR0}" VerticalAlignment="Center" />
-        <Grid             Grid.Column="2" Grid.Row="7" Grid.ColumnSpan="4">
+        <CheckBox         Grid.Column="1" Grid.Row="9" Content="Calc R₀ from JHE:" IsChecked="{Binding SolveR0}" VerticalAlignment="Center" />
+        <Grid             Grid.Column="2" Grid.Row="9" Grid.ColumnSpan="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="B" />
@@ -217,8 +254,8 @@
             
         </Grid>
         
-        <CheckBox         Grid.Column="1" Grid.Row="8" Content="Calc R₀ from JHE:" IsChecked="{Binding SolveR0Interval}" VerticalAlignment="Center" />
-        <Grid             Grid.Column="2" Grid.Row="8" Grid.ColumnSpan="4">
+        <CheckBox         Grid.Column="1" Grid.Row="10" Content="Calc R₀ from JHE:" IsChecked="{Binding SolveR0Interval}" VerticalAlignment="Center" />
+        <Grid             Grid.Column="2" Grid.Row="10" Grid.ColumnSpan="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="B" />
@@ -238,17 +275,56 @@
             
         </Grid>
 
-        <StackPanel Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="6" Orientation="Horizontal">
+        <Path             Grid.Column="0" Grid.Row="11"  Grid.ColumnSpan="6" Style="{StaticResource HorizontalRulePathStyle}" />
+
+        <Label            Grid.Column="0" Grid.Row="12" Content="Vaccinated per Day" Target="{Binding ElementName=slVaccinated}" />
+        <TextBox          Grid.Column="1" Grid.Row="12" x:Name="txtVaccinated"
+                          Text="{Binding Value, ElementName=slVaccinated, StringFormat={}{0:N0}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
+                          Style="{StaticResource NumericTextBoxStyle}" />
+        <Slider           Grid.Column="2" Grid.Row="12" Grid.ColumnSpan="4" x:Name="slVaccinated"
+                          Value="{Binding DailyVaccinated, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
+                          TickPlacement="BottomRight" IsSnapToTickEnabled="True" TickFrequency="1000" Maximum="1000000" 
+                          AutoToolTipPlacement="BottomRight" />
+
+        <Grid             Grid.Column="2" Grid.Row="13" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="B" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label   Grid.Column="0" Content="Effectiveness" Target="{Binding ElementName=slEffectiveness}" />
+            <TextBox Grid.Column="1" x:Name="txtEffectiveness"
+                     Text="{Binding Value, ElementName=slEffectiveness, StringFormat={}{0:N2}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
+                     Style="{StaticResource NumericTextBoxStyle}" />
+            <Slider  Grid.Column="2" x:Name="slEffectiveness"
+                     Value="{Binding Effectiveness, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
+                     TickPlacement="BottomRight" IsSnapToTickEnabled="True" Minimum="0" TickFrequency=".01" Maximum="1" 
+                     AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="2" />
+
+        </Grid>
+
+        <Grid             Grid.Column="2" Grid.Row="14" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="B" />
+            </Grid.ColumnDefinitions>
+            <Label      Grid.Column="0" Grid.Row="3" Content="Start of Vaccination" Target="{Binding ElementName=dtpVaccinationStart}" />
+            <DatePicker Grid.Column="1" Grid.Row="3" x:Name="dtpVaccinationStart"
+                        SelectedDate="{Binding VaccinationStart, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
+                        Style="{StaticResource DatePickerStyle}" />
+        </Grid>
+
+        <StackPanel Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="6" Orientation="Horizontal">
             <Button Margin="3" Padding="15,3,15,3" MinWidth="120" Click="btnData_Click" IsEnabled="{Binding Visibility, ElementName=pbr, Converter={x:Static local:VisibilityToNotBooleanConverter.Instance}}">Show Data</Button>
             <Button Margin="3" Padding="15,3,15,3" MinWidth="120" Click="btnExport_Click" IsEnabled="{Binding Visibility, ElementName=pbr, Converter={x:Static local:VisibilityToNotBooleanConverter.Instance}}">Export Chart</Button>
         </StackPanel>
-        <StackPanel Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="6" Orientation="Horizontal" FlowDirection="RightToLeft" >
+        <StackPanel Grid.Column="0" Grid.Row="15" Grid.ColumnSpan="6" Orientation="Horizontal" FlowDirection="RightToLeft" >
             <Button Margin="3" Padding="15,3,15,3" MinWidth="120" Click="btnClear_Click">Clear Settings</Button>
             <Button Margin="3" Padding="15,3,15,3" MinWidth="120" Click="btnReset_Click">Reset Settings</Button>
             <Button Margin="3" Padding="15,3,15,3" MinWidth="120" Click="btnSave_Click">Save Settings</Button>
         </StackPanel>
 
-        <StatusBar  Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="6">
+        <StatusBar  Grid.Column="0" Grid.Row="16" Grid.ColumnSpan="6">
             <StatusBarItem>
                 <ProgressBar x:Name="pbr" Minimum="0" Maximum="100" Width="200" Height="15" Visibility="Collapsed" />
             </StatusBarItem>

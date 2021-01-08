@@ -97,13 +97,48 @@ namespace LogicLink.Corona {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2021-01-31")]
-        public global::System.DateTime End {
+        public global::System.Nullable<System.DateTime> End {
             get {
-                return ((global::System.DateTime)(this["End"]));
+                return ((global::System.Nullable<System.DateTime>)(this["End"]));
             }
             set {
                 this["End"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2020-12-27")]
+        public global::System.DateTime VaccinationStart {
+            get {
+                return ((global::System.DateTime)(this["VaccinationStart"]));
+            }
+            set {
+                this["VaccinationStart"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50000")]
+        public int DailyVaccinated {
+            get {
+                return ((int)(this["DailyVaccinated"]));
+            }
+            set {
+                this["DailyVaccinated"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.95")]
+        public double Effectiveness {
+            get {
+                return ((double)(this["Effectiveness"]));
+            }
+            set {
+                this["Effectiveness"] = value;
             }
         }
         
@@ -201,7 +236,7 @@ namespace LogicLink.Corona {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("131071")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1048575")]
         public int Show {
             get {
                 return ((int)(this["Show"]));

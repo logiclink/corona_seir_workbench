@@ -22,7 +22,7 @@ namespace LogicLink.Corona {
         TimeSpan InfectiousPeriod { get; set;  }
 
         /// <summary>
-        /// Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune. transl. "Basisreproduktionszahl"
+        /// Basic reproduction number (R₀), number of individuals which are infected by an infectious individual if none of the population is immune.
         /// </summary>
         double Reproduction { get; set; }
 

@@ -20,8 +20,17 @@
     <Setting Name="Start" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">2020-01-27</Value>
     </Setting>
-    <Setting Name="End" Type="System.DateTime" Scope="User">
-      <Value Profile="(Default)">2021-01-31</Value>
+    <Setting Name="End" Type="System.Nullable&lt;System.DateTime&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="VaccinationStart" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2020-12-27</Value>
+    </Setting>
+    <Setting Name="DailyVaccinated" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50000</Value>
+    </Setting>
+    <Setting Name="Effectiveness" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.95</Value>
     </Setting>
     <Setting Name="Country" Type="System.String" Scope="User">
       <Value Profile="(Default)">Germany</Value>
@@ -220,7 +229,7 @@
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="Show" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">131071</Value>
+      <Value Profile="(Default)">1048575</Value>
     </Setting>
     <Setting Name="CountriesISO3" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;

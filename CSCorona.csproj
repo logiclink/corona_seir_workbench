@@ -2,15 +2,21 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Corona</AssemblyName>
     <RootNamespace>LogicLink.Corona</RootNamespace>
     <ApplicationIcon>Corona.ico</ApplicationIcon>
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.2.1218</AssemblyVersion>
-    <FileVersion>1.0.1.1218</FileVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0103</AssemblyVersion>
+    <FileVersion>2.0.0.0103</FileVersion>
+    <PackageId>LogicLink.Corona</PackageId>
+    <Authors>LogicLink, Marcus Müller</Authors>
+    <Product>Corona SEIR Workbench</Product>
+    <Copyright>2020-2021 by LogicLink, Marcus Müller</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://www.logiclink.de/2020/11/20/corona-seir-workbench/</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +38,10 @@
     <None Remove="Infos\**" />
     <None Remove="Unbenutzt\**" />
     <None Remove="Version*\**" />
+    <None Include="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <Page Remove="Dokumentation\**" />
     <Page Remove="Graphik\**" />
     <Page Remove="images\**" />
@@ -46,8 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.12.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
   </ItemGroup>
 
