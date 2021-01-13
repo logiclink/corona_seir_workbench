@@ -585,11 +585,19 @@ namespace LogicLink.Corona {
         }
 
         /// <summary>
-        /// Ressets all changes to view model
+        /// Resets all changes to view model
         /// </summary>
         public void Reset() {
             Settings.Default.Reset();
             Load();
+        }
+
+        /// <summary>
+        /// Resets all changes to view model
+        /// </summary>
+        public void ResetVaccinated() {
+            this.VaccinationStart = DateTime.Parse((string)Settings.Default.Properties[nameof(Settings.Default.VaccinationStart)].DefaultValue);
+            this.DailyVaccinated = int.Parse((string)Settings.Default.Properties[nameof(Settings.Default.DailyVaccinated)].DefaultValue);
         }
 
         /// <summary>

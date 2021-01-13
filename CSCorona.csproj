@@ -8,9 +8,9 @@
     <AssemblyName>Corona</AssemblyName>
     <RootNamespace>LogicLink.Corona</RootNamespace>
     <ApplicationIcon>Corona.ico</ApplicationIcon>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0103</AssemblyVersion>
-    <FileVersion>2.0.0.0103</FileVersion>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.1.0113</AssemblyVersion>
+    <FileVersion>2.0.1.0113</FileVersion>
     <PackageId>LogicLink.Corona</PackageId>
     <Authors>LogicLink, Marcus Müller</Authors>
     <Product>Corona SEIR Workbench</Product>

@@ -52,73 +52,104 @@ namespace LogicLink.Corona {
                 try {
                     _pgr.Report(1, "Calculating basic reproduction numbers ...", true);
 
-                    SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
-
                     List<JHU.Record> lConfirmedRecords = await new JHU().GetDataAsync(vm.Country).ToListAsync();
                     _pgr.Report(3);
 
                     List<OWID.Record> lVaccinatedRecords = await new OWID().GetDataAsync(vm.Country).ToListAsync();
                     _pgr.Report(5);
 
-                    // Align model with confirmed numbers
-                    int iStartVacDif = (lVaccinatedRecords[0].Date - vm.Start).Days;
-                    int h;
-                    for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++) {
-                        h = i - iStartVacDif - 1;
-                        if(h >= 0 && h < lVaccinatedRecords.Count)
-                            seirvR0.Vaccinated = lVaccinatedRecords[h].Vaccinated;
-                        seirvR0.Calc(i);
+                    DateTime dtStart;
+
+                    if(lVaccinatedRecords.Any()) {
+                        SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
+
+                        // Align model with confirmed numbers
+                        int iStartVacDif = (lVaccinatedRecords[0].Date - vm.Start).Days;
+                        int h;
+                        for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++) {
+                            h = i - iStartVacDif - 1;
+                            if(h >= 0 && h < lVaccinatedRecords.Count)
+                                seirvR0.Vaccinated = lVaccinatedRecords[h].Vaccinated;
+                            seirvR0.Calc(i);
+                        }
+                        _pgr.Report(6);
+
+                        // Generate List of confirmed cases
+                        List<int> lConfirmed = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
+                        _pgr.Report(7);
+
+                        // Generate List of vaccinated individuals
+                        List<int> lVaccinated = new List<int>();
+
+                        // Add zero values for confirmed values before vaccination started
+                        for(int i = 0; i < (lVaccinatedRecords[0].Date - DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start)).Days; i++)
+                            lVaccinated.Add(0);
+
+                        // Add the overlapping date range
+                        int iVacConDif = (DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start) - lVaccinatedRecords[0].Date).Days;
+                        lVaccinated.AddRange(lVaccinatedRecords.Skip(iVacConDif)
+                                                               .Take(iVacConDif < 0 ? iVacConDif + lConfirmed.Count : lConfirmed.Count)
+                                                               .Select(r => r.Vaccinated));
+
+                        // Fill vaccinated list with last value until the number of confirmed is reached
+                        for(int i = 0; i < lConfirmed.Count - lVaccinated.Count; i++)
+                            lVaccinated.Add(lVaccinated[^1]);
+                        _pgr.Report(8);
+
+                        Progress pgrR0 = new Progress(9, 89);
+                        pgrR0.Changed += _pgr_Changed;
+
+                        // Create dictionary of R₀ values per date
+                        _dicReproduction = new Dictionary<DateTime, double>();
+                        int j = 0;
+                        dtStart = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
+                        IR0Solver slr = vm.SolveR0 
+                                        ? new SEIRVR0Solver(vm.SolveR0ResidualDayWindow) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated } as IR0Solver
+                                        : new SEIRVR0IntervalSolver(vm.SolveR0IntervalDays) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated };
+                        foreach(double d in slr.Solve(pgrR0))
+                            _dicReproduction.Add(dtStart.AddDays(j++), d);
+
+                        pgrR0.Changed -= _pgr_Changed;
+
+                    } else {
+
+                        SEIR seirR0 = new SEIR(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
+                        _pgr.Report(5);
+
+                        // Align confirmed numbers with model
+                        for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++)
+                            seirR0.Calc(i);
+                        List<int> ll = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
+                        _pgr.Report(6);
+
+                        Progress pgrR0 = new Progress(7, 91);
+                        pgrR0.Changed += _pgr_Changed;
+
+                        // Create dictionary of R₀ values per date
+                        _dicReproduction = new Dictionary<DateTime, double>();
+                        int j = 0;
+                        dtStart = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
+                        IR0Solver slr = vm.SolveR0
+                                        ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = ll } as IR0Solver
+                                        : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = ll };
+                        foreach(double d in slr.Solve(pgrR0))
+                            _dicReproduction.Add(dtStart.AddDays(j++), d);
+
+                        pgrR0.Changed -= _pgr_Changed;
                     }
-                    _pgr.Report(6);
-
-                    // Generate List of confirmed cases
-                    List<int> lConfirmed = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
-                    _pgr.Report(7);
-
-                    // Generate List of vaccinated individuals
-                    List<int> lVaccinated = new List<int>();
-
-                    // Add zero values for confirmed values before vaccination started
-                    for(int i = 0; i < (lVaccinatedRecords[0].Date - DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start)).Days; i++)
-                        lVaccinated.Add(0);
-
-                    // Add the overlapping date range
-                    int iVacConDif = (DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start) - lVaccinatedRecords[0].Date).Days;
-                    lVaccinated.AddRange(lVaccinatedRecords.Skip(iVacConDif)
-                                                           .Take(iVacConDif < 0 ? iVacConDif + lConfirmed.Count : lConfirmed.Count)
-                                                           .Select(r => r.Vaccinated));
-
-                    // Fill vaccinated list with last value until the number of confirmed is reached
-                    for(int i = 0; i < lConfirmed.Count - lVaccinated.Count; i++)
-                        lVaccinated.Add(lVaccinated[^1]);
-                    _pgr.Report(8);
-
-                    Progress pgrR0 = new Progress(9, 89);
-                    pgrR0.Changed += _pgr_Changed;
-
-                    // Create dictionary of R₀ values per date
-                    _dicReproduction = new Dictionary<DateTime, double>();
-                    int j = 0;
-                    DateTime dt = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
-                    IR0Solver slr = vm.SolveR0 
-                                    ? new SEIRVR0Solver(vm.SolveR0ResidualDayWindow) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated } as IR0Solver
-                                    : new SEIRVR0IntervalSolver(vm.SolveR0IntervalDays) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated };
-                    foreach(double d in slr.Solve(pgrR0))
-                        _dicReproduction.Add(dt.AddDays(j++), d);
 
                     _pgr.Report(99);
 
                     // Calculate R₀ median of last 5 days
                     double dR0Sum = 0d;
-                    for(int k = j - 5; k < j; k++)
-                        dR0Sum += _dicReproduction[dt.AddDays(k)];
+                    for(int i = _dicReproduction.Count - 5; i < _dicReproduction.Count; i++)
+                        dR0Sum += _dicReproduction[dtStart.AddDays(i)];
                     //for(DateTime dtFuture = dt.AddDays(j); dtFuture <= vm.End; dtFuture = dtFuture.AddDays(1))
                     //    _dicReproduction.Add(dtFuture, dR0Sum / 5);
                     vm.Reproduction = dR0Sum / 5;
 
-                    pgrR0.Changed -= _pgr_Changed;
-
                     _pgr.Report(100);
+
             } catch(Exception ex) {
                 MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
@@ -138,9 +169,12 @@ namespace LogicLink.Corona {
 
                 List<OWID.Record> l = await new OWID().GetDataAsync(vm.Country).ToListAsync();
                 _pgr.Report(30);
-                if(!_bManualVaccination && l.Count != 0) {                                                          // Calculate vaccination parameter from vaccinated values
-                    vm.VaccinationStart = l[0].Date;
-                    vm.DailyVaccinated = (int)Math.Round((double)l[^1].Vaccinated / l.Count);
+                if(!_bManualVaccination) {
+                    if(l.Count != 0) {                                                                              // Calculate vaccination parameter from vaccinated values
+                        vm.VaccinationStart = l[0].Date;
+                        vm.DailyVaccinated = (int)Math.Round((double)l[^1].Vaccinated / l.Count);
+                    } else
+                        vm.ResetVaccinated();
                 }
 
                 if(vm.DailyVaccinated != 0 && vm.VaccinationStart >= vm.Start && vm.VaccinationStart <= vm.End) {   // Calculate vaccinated values per date
