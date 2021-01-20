@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="SEIRV delta Vaccinated.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   id="svg1654"
+   version="1.1"
+   viewBox="0 0 54.900459 8.3085365"
+   height="8.3085365mm"
+   width="54.900459mm">
+  <defs
+     id="defs1648">
+    <clipPath
+       id="clip0">
+      <rect
+         x="96"
+         y="471"
+         width="235"
+         height="70"
+         id="rect2217" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     inkscape:window-maximized="1"
+     inkscape:window-y="-11"
+     inkscape:window-x="-11"
+     inkscape:window-height="2066"
+     inkscape:window-width="3840"
+     fit-margin-bottom="0"
+     fit-margin-right="0"
+     fit-margin-left="0"
+     fit-margin-top="0"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="241.15841"
+     inkscape:cx="-442.93459"
+     inkscape:zoom="1.979899"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
+  <metadata
+     id="metadata1651">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-176.65692,5.6661685)"
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Ebene 1">
+    <text
+       style="stroke-width:0.264583"
+       y="0.75669497"
+       x="176.41972"
+       id="text2232"
+       font-size="9.525px"
+       font-weight="400"
+       font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif">ΔS<tspan
+   style="stroke-width:0.0700043"
+   id="tspan2222"
+   y="2.6087782"
+   x="186.80461"
+   font-size="6.87917px">v</tspan><tspan
+   style="stroke-width:0.264583"
+   id="tspan2224"
+   y="0.75669497"
+   x="191.23373" />→<tspan
+   style="stroke-width:0.264583"
+   id="tspan2226"
+   y="0.75669497"
+   x="201.35405">V</tspan><tspan
+   style="stroke-width:0.264583"
+   id="tspan2228"
+   y="0.75669497"
+   x="209.75458">=</tspan><tspan
+   style="stroke-width:0.264583"
+   id="tspan2230"
+   y="0.75669497"
+   x="219.54416">𝑎𝑁</tspan></text>
+  </g>
+</svg>

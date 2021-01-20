@@ -38,7 +38,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <NestedTypes>
-      <Struct Name="LogicLink.Corona.JHU.Record" Collapsed="true">
+      <Struct Name="LogicLink.Corona.JHU.Record">
         <TypeIdentifier>
           <NewMemberFileName>JHU.cs</NewMemberFileName>
         </TypeIdentifier>
@@ -63,7 +63,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <NestedTypes>
-      <Struct Name="LogicLink.Corona.RKINowcasting.Record" Collapsed="true">
+      <Struct Name="LogicLink.Corona.RKINowcasting.Record">
         <TypeIdentifier>
           <NewMemberFileName>RKINowcasting.cs</NewMemberFileName>
         </TypeIdentifier>
@@ -104,7 +104,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <NestedTypes>
-      <Struct Name="LogicLink.Corona.OWID.Record" Collapsed="true">
+      <Struct Name="LogicLink.Corona.OWID.Record">
         <TypeIdentifier>
           <NewMemberFileName>OWID.cs</NewMemberFileName>
         </TypeIdentifier>
