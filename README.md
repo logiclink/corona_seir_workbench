@@ -10,7 +10,7 @@ Prerequisite for controlling the pandemic is a data base as good as possible. In
 
 The central goal of pandemic control is to avoid overburdening the health care system so that all those suffering from COVID 19 receive the best possible medical care. Moreover, the lowest possible infection rate is desirable to minimize the health consequences for the population.
 
-On the basis of the data obtained, [epidemic models]https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology can make predictions about the infection process in the future. The number of infections grows exponentially. As a result, the rise in the number of patients can get out of hand quickly and overburden the healthcare system. Because of this, early intervention and a review of the measures taken are essential to control the pandemic.
+On the basis of the data obtained, [epidemic models](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) can make predictions about the infection process in the future. The number of infections grows exponentially. As a result, the rise in the number of patients can get out of hand quickly and overburden the healthcare system. Because of this, early intervention and a review of the measures taken are essential to control the pandemic.
 
 ## The SEIR Model
 The [SEIR model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) belongs to the class of compartment models that sort people into different compartments. The SEIR model divides the population into four compartments: "**S**usceptible" (people who are susceptible to an infection), "**E**xposed" (infected people during the incubation period), "**I**nfectious" (infectious people) and "**R**ecovered" (people who recovered from the disease or died):
