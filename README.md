@@ -181,7 +181,7 @@ A view takes care of the display of *ISEIR* data. The view can be either impleme
 
 Historical R₀ values are calculated by solver objects with an *IR0Solver* interface. The interface defines a *Solve* method, which returns a sequence of R₀ values. The *IR0Solver* interface is implemented by a *SEIRR0Solver* class, which compares for each day the calculated case numbers of the SEIR model with the actual case numbers and returns the optimal R₀ value for the day by using the Levenberg-Marquardt<sup>[10](#f10)</sup> method. As a simple approach, all R₀ values between 0 and 10 are calculated in steps of 0.1 and the largest R₀ value with the smallest deviation from the actual case numbers is returned.
 
-<p align="center"><img src="images/R₀-Solver%20Klassenmodell.svg" alt="Class model of the R₀ solver"></p>
+<p align="center"><img src="images/R0-Solver%20Klassenmodell.svg" alt="Class model of the R₀ solver"></p>
 <p align="center"><sup>Class model of the R₀ solver</sup></p>
 
 Historical infection data from the Johns-Hopkins [Center for Systems Science and Engineering](https://systems.jhu.edu/) is retrieved by a *JHU* object and returned as data series via the *JHUDateSeiriesView* view. Since the data of the Johns-Hopkins-University is a unique algorithm, no interface was defined for the *JHU* class:
