@@ -18,7 +18,7 @@ The [SEIR model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiol
 <p align="center"><img src="images/SEIR.svg" alt="Compartments of the SEIR model"></p>
 <p align="center"><sup>Compartments of the SEIR model</sup></p>
 
-During modeling, people move from one compartment to the next. The calculation takes place per time unit. Usually a single day is used as time unit.
+During modeling, people move from one compartment to the next. The calculation takes place per time unit. Usually, a single day is used as time unit.
 
 At the beginning of the epidemic almost all persons are healthy and in the "Susceptible" compartment. All persons in this compartment can be infected with the corona virus. After an infection, a person moves to the "**E**xposed" compartment and remains there for the medium incubation period of the disease. At this time the person is not yet contagious to other people. A study<sup>[2](#f2)</sup> in January stated the mean incubation time as 5.2 days. A detailed discussion can be found in Byrne et al.<sup>[3](#f3)</sup>.
 
@@ -71,19 +71,19 @@ After the disease has been overcome or the infectious person has been isolated, 
 
 The symbols used in the equations represent the following values:
 
-<p align="center"><img src="images/SEIRV%20Legende_en.svg" alt="SEIR Legend"></p>
+<p align="center"><img src="images/SEIRV%20Legende_en.svg" alt="SEIRV Legend"></p>
 
 The new numbers of persons *S‘*, *E‘*, *I‘*, *R'* and *V'* in the compartments *S*, *E*, *I*, *R* and *V* after a time unit can be calculated with the following formulas:
 
-![SEIR next Susceptible](images/SEIRV%20next%20Vaccinated.svg)
+![SEIRV next Vaccinated](images/SEIRV%20next%20Vaccinated.svg)
 
-![SEIR next Susceptible](images/SEIRV%20next%20Susceptible.svg)
+![SEIRV next Susceptible](images/SEIRV%20next%20Susceptible.svg)
 
-![SEIR next Exposed](images/SEIRV%20next%20Exposed.svg)
+![SEIRV next Exposed](images/SEIRV%20next%20Exposed.svg)
 
-![SEIR next Infectious](images/SEIR%20next%20Infectious.svg)
+![SEIRV next Infectious](images/SEIR%20next%20Infectious.svg)
 
-![SEIR next Recovered](images/SEIR%20next%20Recovered.svg)
+![SEIRV next Recovered](images/SEIR%20next%20Recovered.svg)
 
 ## The Workbench
 The goal of the Corona Workbench was to create an infrastructure for modelling an epidemic. In addition to the modelling, this includes the graphical output of results per time unit and an easy modification of modelling parameters. To compare the modelling with historical data, it should be possible to display population sizes, infection data and R₀ values in the same chart. In addition, the software should be easily extendable so that other models can be implemented without much effort.
