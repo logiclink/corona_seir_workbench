@@ -177,7 +177,7 @@ Die Corona Workbench arbeitet mit einem Interface-basierten Klassenmodell für d
 <p align="center"><img src="images/SEIRV%20Klassenmodell.svg" alt="SEIR & SERIV Klassenmodell"></p>
 <p align="center"><sup>SEIR & SERIV Klassenmodell</sup></p>
 
-Um ein *ISEIR*-Objekt anzuzeigen wird dieses an eine Sicht übergeben. Dies kann entweder eine *ISeriesView* für diskrete Zeitabschnitte oder eine *IDateSeriesView* für ein Zeitintervall mit Start- und Enddatum sein. Über die *CalcAsync*-Methoden wird das Modell berechnet und die einzelnen Datenpunkt ein Datenserien gespeichert. Die Sicht *SEIRR0DateSeriesView* erlaubt die Übergabe verschiedener R₀-Werte für ein Datum.
+Um ein *ISEIR*-Objekt anzuzeigen wird dieses an eine Sicht übergeben. Dies kann entweder eine *ISeriesView* für diskrete Zeitabschnitte oder eine *IDateSeriesView* für ein Zeitintervall mit Start- und Enddatum sein. Über die *CalcAsync*-Methoden wird das Modell berechnet und die einzelnen Datenpunkte in Datenserien gespeichert. Die Sicht *SEIRR0DateSeriesView* erlaubt die Übergabe verschiedener R₀-Werte für ein Datum.
 
 Die Berechnung der R₀-Werte erfolgt über Solver mit einer *IR0Solver*-Schnittstelle. Diese implementiert eine *Solve*-Methode, die eine Sequenz von R₀-Werten zurückgibt. Das Interface wird von einer *SEIRR0Solver*-Klasse implementiert, die für jeden Tag die Fallzahlen eines SEIR-Modells mit den tatsächlichen Fallzahlen vergleicht und den besten R₀-Wert für den Tag mit der Levenberg-Marquardt-Methode<sup>[10](#f10)</sup> berechnet. Dafür werden der Einfachheit halber aller R₀-Werte zwischen 0 und 10 in 0,1 Schritten berechnet und der Wert mit der kleinsten Abweichung in den Fallzahlen zurückgegeben.
 
