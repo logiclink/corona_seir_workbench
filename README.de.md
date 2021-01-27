@@ -75,11 +75,11 @@ Die verwendeten Symbole in den Gleichungen stehen für folgende Werte:
 
 Die neuen Personenanzahlen *S‘*, *E‘*, *I‘*, *R‘* und *V‘* in den einzelnen Kompartimenten *S*, *E*, *I*, *R* und *V* nach einer Zeiteinheit kann nach folgenden Formeln berechnet werden:
 
-![SEIR next Susceptible](images/SEIRV%20next%20Vaccinated.svg)
+![SEIRV next Vaccinated](images/SEIRV%20next%20Vaccinated.svg)
 
-![SEIR next Susceptible](images/SEIRV%20next%20Susceptible.svg)
+![SEIRV next Susceptible](images/SEIRV%20next%20Susceptible.svg)
 
-![SEIR next Exposed](images/SEIRV%20next%20Exposed.svg)
+![SEIRV next Exposed](images/SEIRV%20next%20Exposed.svg)
 
 ![SEIR next Infectious](images/SEIR%20next%20Infectious.svg)
 
