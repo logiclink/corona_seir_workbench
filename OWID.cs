@@ -71,7 +71,11 @@ namespace LogicLink.Corona {
                 i += j + 1;
 
                 j = sp[i..].QuotedIndexOf(',');
-                int iVaccinated = j > 0 ? int.Parse(sp.Slice(i, j)) : (sCountry == sCountryPrevious ? iVaccinatedPrevious : 0);
+                int iVaccinations = j > 0 ? int.Parse(sp.Slice(i, j)) : 0;
+                i += j + 1;
+
+                j = sp[i..].QuotedIndexOf(',');
+                int iVaccinated = j > 0 ? int.Parse(sp.Slice(i, j)) : (iVaccinations != 0 ? iVaccinations : (sCountry == sCountryPrevious ? iVaccinatedPrevious : 0));
                 i += j + 1;
 
                 return (sCountry, new Record(dtDate, iVaccinated, sCountry == sCountryPrevious ? iVaccinated - iVaccinatedPrevious : 0));
