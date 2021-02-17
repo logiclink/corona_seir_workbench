@@ -77,7 +77,7 @@ namespace LogicLink.Corona {
                 _seir.Calc(iDays);
 
                 if(_serSusceptible != null)
-                    _serSusceptible.Points.AddXY(dt, _seir.Susceptible);
+                    _serSusceptible.Points.AddXY(dt, _seir.Susceptible - ((ISEIRV)_seir).Vaccinated);
                 if(_serExposed != null)
                     _serExposed.Points.AddXY(dt, _seir.Exposed);
                 if(_serInfectious != null)
