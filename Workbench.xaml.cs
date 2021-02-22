@@ -61,7 +61,10 @@ namespace LogicLink.Corona {
                     DateTime dtStart;
 
                     if(lVaccinatedRecords.Any()) {
-                        SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
+                        SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness, vm.ProtectionStartPeriod);
+
+                        // TODO MM210217 HIER WEITERMACHEN UND ProtectionStartPeriod als Zeitversatz bei den geimpften Personen berücksichtigen
+                        //               HIER WÄRE EIN ALLGEMEINER MECHANISMUS ZUM "ALLIGNEN" VON SQUENZEN SINNVOLL
 
                         // Align model with confirmed numbers
                         int iStartVacDif = (lVaccinatedRecords[0].Date - vm.Start).Days;
@@ -235,11 +238,11 @@ namespace LogicLink.Corona {
         private async Task UpdateChartAsync(WorkbenchViewModel vm) {
             _bUpdating = true;
 
-            try {
+            //try {
                 _pgr.Report(1, "Calculating chart series ...", true);
 
                 // 1. Calculate SEIR model and create series
-                ISEIR seir = new SEIRV(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness);
+                ISEIR seir = new SEIRV(vm.Population - vm.Infectious, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness, vm.ProtectionStartPeriod);
                 IDateSeriesView vSeir = _dicReproduction == null
                                         ? _dicVaccinated == null 
                                           ? new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
@@ -315,10 +318,10 @@ namespace LogicLink.Corona {
                 cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
             
                 _pgr.Report(100, "Ready", false);
-            } catch(Exception ex) {
-                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
-            }
+            //} catch(Exception ex) {
+            //    MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            //    Close();
+            //}
             _bUpdating = false;
         }
 

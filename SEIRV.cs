@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LogicLink.Corona {
@@ -6,7 +8,8 @@ namespace LogicLink.Corona {
     /// <summary>
     /// SEIRV model class
     /// </summary>
-    public class SEIRV : SEIR, ISEIRV {
+    public class SEIRV: SEIR, ISEIRV {
+        protected Queue<int> _qVaccinated = new Queue<int>();
 
         #region Protected Static Compartment Functions
 
@@ -40,8 +43,11 @@ namespace LogicLink.Corona {
         /// <remarks>
         /// The population is the total number of all individuals in all SEIR compartments. In this case it's S(usceptible) + I(nfectious). 
         /// </remarks>
-        public SEIRV(int iSusceptible, int iInfectious, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness) : base(iSusceptible, iInfectious, tsIncubationPeriod, tsInfectiousPeriod, dReproduction) {
+        public SEIRV(int iSusceptible, int iInfectious, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness, TimeSpan tsProtectionStartPeriod) : base(iSusceptible, iInfectious, tsIncubationPeriod, tsInfectiousPeriod, dReproduction) {
             this.Effectiveness = dEffectiveness;
+            this.ProtectionStartPeriod = tsProtectionStartPeriod;
+            for(int i = 1; i <= tsProtectionStartPeriod.TotalDays; i++)
+                _qVaccinated.Enqueue(0);
         }
 
         /// <summary>
@@ -56,7 +62,7 @@ namespace LogicLink.Corona {
         /// <remarks>
         /// The population is the total number of all individuals in all SEIR compartments. In this case it's S(usceptible) + I(nfectious). 
         /// </remarks>
-        public SEIRV(int iSusceptible, int iInfectious, int iVaccinated, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness) : this(iSusceptible, iInfectious, tsIncubationPeriod, tsInfectiousPeriod, dReproduction, dEffectiveness) {
+        public SEIRV(int iSusceptible, int iInfectious, int iVaccinated, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness, TimeSpan tsProtectionStartPeriod) : this(iSusceptible, iInfectious, tsIncubationPeriod, tsInfectiousPeriod, dReproduction, dEffectiveness, tsProtectionStartPeriod) {
             this.Vaccinated = iVaccinated;
         }
 
@@ -74,16 +80,19 @@ namespace LogicLink.Corona {
         /// <remarks>
         /// The population is the total number of all individuals in all SEIR compartments. In this case it's S(usceptible) + E(xposed) + I(nfectious) +R(emoved). 
         /// </remarks>
-        public SEIRV(int iSusceptible, int iExposed, int iInfectious, int iRemoved, int iVaccinated, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness) : base(iSusceptible, iExposed, iInfectious, iRemoved, tsIncubationPeriod, tsInfectiousPeriod, dReproduction)  {
-            this.Vaccinated = iVaccinated;
+        public SEIRV(int iSusceptible, int iExposed, int iInfectious, int iRemoved, int iVaccinated, TimeSpan tsIncubationPeriod, TimeSpan tsInfectiousPeriod, double dReproduction, double dEffectiveness, TimeSpan tsProtectionStartPeriod) : base(iSusceptible, iExposed, iInfectious, iRemoved, tsIncubationPeriod, tsInfectiousPeriod, dReproduction) {
             this.Effectiveness = dEffectiveness;
+            this.ProtectionStartPeriod = tsProtectionStartPeriod;
+            for(int i = 1; i <= tsProtectionStartPeriod.TotalDays; i++)
+                _qVaccinated.Enqueue(0);
+            this.Vaccinated = iVaccinated;
         }
 
         /// <summary>
         /// Creates a new SEIR object from another ISEIRV object
         /// </summary>
         /// <param name="seir">Another ISEIRV objext</param>
-        public SEIRV(ISEIRV seirv) : this(seirv.Susceptible, seirv.Exposed, seirv.Infectious, seirv.Removed, seirv.Vaccinated, seirv.IncubationPeriod, seirv.InfectiousPeriod, seirv.Reproduction, seirv.Effectiveness) { }
+        public SEIRV(ISEIRV seirv) : this(seirv.Susceptible, seirv.Exposed, seirv.Infectious, seirv.Removed, seirv.Vaccinated, seirv.IncubationPeriod, seirv.InfectiousPeriod, seirv.Reproduction, seirv.Effectiveness, seirv.ProtectionStartPeriod) { }
 
         #endregion
 
@@ -94,6 +103,11 @@ namespace LogicLink.Corona {
         /// </summary>
         public double Effectiveness { get; private set; }
 
+        /// <summary>
+        /// TimeSpan until a vaccine protects against an infection.
+        /// </summary>
+        public TimeSpan ProtectionStartPeriod { get; private set; }
+
         #endregion
 
         #region Public SEIRV Properties
@@ -101,7 +115,10 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Number of individuals in the V(accinated) compartment. This value is set manually.
         /// </summary>
-        public int Vaccinated { get; set; }
+        public int Vaccinated {
+            get => _qVaccinated.LastOrDefault();
+            set => _qVaccinated.Enqueue(value);
+        }
 
         #endregion
 
@@ -115,10 +132,11 @@ namespace LogicLink.Corona {
             for(int i = this.Day; i < iDay; i++) {
                 double dSusceptible = _dSusceptible;
                 double dExposed = _dExposed;
-                double dInfectious =_dInfectious;
+                double dInfectious = _dInfectious;
 
-                _dSusceptible -= dΔSusceptibleToExposed(dSusceptible, dInfectious, this.Vaccinated, _iPopulation, this.InfectiousPeriod, this.Reproduction, this.Effectiveness);
-                _dExposed += dΔSusceptibleToExposed(dSusceptible, dInfectious, this.Vaccinated, _iPopulation, this.InfectiousPeriod, this.Reproduction, this.Effectiveness) - dΔExposedToInfectious(dExposed, this.IncubationPeriod);
+                int iVaccinatedWithProtection = _qVaccinated.Count > 1 ? _qVaccinated.Dequeue() : _qVaccinated.Peek();
+                _dSusceptible -= dΔSusceptibleToExposed(dSusceptible, dInfectious, iVaccinatedWithProtection, _iPopulation, this.InfectiousPeriod, this.Reproduction, this.Effectiveness);
+                _dExposed += dΔSusceptibleToExposed(dSusceptible, dInfectious, iVaccinatedWithProtection, _iPopulation, this.InfectiousPeriod, this.Reproduction, this.Effectiveness) - dΔExposedToInfectious(dExposed, this.IncubationPeriod);
                 _dInfectious += dΔExposedToInfectious(dExposed, this.IncubationPeriod) - dΔInfectiousToRemoved(dInfectious, this.InfectiousPeriod);
                 _dRemoved += dΔInfectiousToRemoved(dInfectious, this.InfectiousPeriod);
                 this.Day++;

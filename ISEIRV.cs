@@ -16,6 +16,11 @@ namespace LogicLink.Corona {
         /// </summary>
         double Effectiveness { get; }
 
+        /// <summary>
+        /// TimeSpan until a vaccine protects against an infection.
+        /// </summary>
+        public TimeSpan ProtectionStartPeriod { get; }
+
         #endregion
 
         #region SEIRV Properties

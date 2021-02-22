@@ -27,6 +27,7 @@ namespace LogicLink.Corona {
         private DateTime _dtVaccinationStart;           // Start date of the vaccination
         private int _iDailyVaccinated;                  // Number of individuals who are vaccinated per day
         private double _dEffectiveness;                 // Effectiveness of a vaccine ranging from 0 to 1. 1 stands for 100% of protection against an infection.
+        private TimeSpan _tsProtectionStartPeriod;      // Timespan which has to pass before a vaccine can protect against an infection
 
         private bool _bShowSusceptible;                 // If true, the (S)usceptible-series of the SEIR-object is shown
         private bool _bShowExposed;                     // If true, the (E)xposed-series of the SEIR-object is shown
@@ -185,6 +186,19 @@ namespace LogicLink.Corona {
             get { return _dEffectiveness; }
             set { if(_dEffectiveness != value) {
                     _dEffectiveness = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the timespan in which an individual is infectious.
+        /// </summary>
+        public TimeSpan ProtectionStartPeriod {
+            get { return _tsProtectionStartPeriod; }
+            set {
+                if(_tsProtectionStartPeriod != value) {
+                    _tsProtectionStartPeriod = value;
                     OnPropertyChanged();
                 }
             }
@@ -516,6 +530,7 @@ namespace LogicLink.Corona {
             this.VaccinationStart = Settings.Default.VaccinationStart;
             this.DailyVaccinated = Settings.Default.DailyVaccinated;
             this.Effectiveness = Settings.Default.Effectiveness;
+            this.ProtectionStartPeriod = Settings.Default.ProtectionStartPeriod;
             this.ShowSusceptible =              bShow && (Settings.Default.Show >>  0 & 1) == 1;
             this.ShowExposed =                  bShow && (Settings.Default.Show >>  1 & 1) == 1;
             this.ShowInfectious =               bShow && (Settings.Default.Show >>  2 & 1) == 1;
@@ -557,6 +572,7 @@ namespace LogicLink.Corona {
             Settings.Default.VaccinationStart = this.VaccinationStart;
             Settings.Default.DailyVaccinated = this.DailyVaccinated;
             Settings.Default.Effectiveness = this.Effectiveness;
+            Settings.Default.ProtectionStartPeriod = this.ProtectionStartPeriod;
             Settings.Default.Show = (_bShowSusceptible ?              1 <<  0 : 0) |
                                     (_bShowExposed ?                  1 <<  1 : 0) |
                                     (_bShowInfectious ?               1 <<  2 : 0) |

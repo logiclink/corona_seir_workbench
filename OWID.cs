@@ -62,7 +62,7 @@ namespace LogicLink.Corona {
                         break;
                 }
 
-                // Ignore second colun with 3-letter code
+                // Ignore second column with 3-letter code
                 j = sp[i..].QuotedIndexOf(',');
                 i += j + 1;
 

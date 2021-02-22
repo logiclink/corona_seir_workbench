@@ -13,7 +13,7 @@
     </Setting>
     <Setting Name="InfectiousPeriod" Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">2.21:36:00</Value>
-    </Setting>
+    </Setting>    
     <Setting Name="Reproduction" Type="System.Double" Scope="User">
       <Value Profile="(Default)">3.4</Value>
     </Setting>
@@ -31,6 +31,9 @@
     </Setting>
     <Setting Name="Effectiveness" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.95</Value>
+    </Setting>
+	<Setting Name="ProtectionStartPeriod" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">14.00:00:00</Value>
     </Setting>
     <Setting Name="Country" Type="System.String" Scope="User">
       <Value Profile="(Default)">Germany</Value>

@@ -70,9 +70,7 @@ namespace LogicLink.Corona {
                 int iDays = (dt - dtStart).Days;
 
                 _seir.Reproduction = _dicReproduction.TryGetValue(dt, out double d) ? d : dReproduction;
-
-                if(_dicVaccinated.TryGetValue(dt, out int j))
-                     ((ISEIRV)_seir).Vaccinated = j;
+                ((ISEIRV)_seir).Vaccinated = _dicVaccinated.TryGetValue(dt, out int j) ? j : ((ISEIRV)_seir).Vaccinated;
 
                 _seir.Calc(iDays);
 

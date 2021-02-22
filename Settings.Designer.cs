@@ -144,6 +144,18 @@ namespace LogicLink.Corona {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14.00:00:00")]
+        public global::System.TimeSpan ProtectionStartPeriod {
+            get {
+                return ((global::System.TimeSpan)(this["ProtectionStartPeriod"]));
+            }
+            set {
+                this["ProtectionStartPeriod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Germany")]
         public string Country {
             get {
