@@ -44,11 +44,9 @@ namespace LogicLink.Corona {
             /// <param name="spReproduction">Basic reproduction number (R₀) as <see cref="ReadOnlySpan<char>"/> or string in an invariant number format</param>
             /// <param name="spReproduction7Day">Average of 7 days of the basic reproduction number (R₀) as <see cref="ReadOnlySpan<char>"/> or string in an invariant number format</param>
             public Record(ReadOnlySpan<char> spDate, ReadOnlySpan<char> spReproduction, ReadOnlySpan<char> spReproduction7Day) {
-                if(int.TryParse(spDate, out int i) && i != 0 &&
-                   double.TryParse(spReproduction, NumberStyles.Any, CultureInfo.InvariantCulture, out Reproduction) &&
-                   double.TryParse(spReproduction7Day, NumberStyles.Any, CultureInfo.InvariantCulture, out Reproduction7Day)) {
-                    Date = new DateTime(1899, 12, 31).AddDays(i);
-                } else {
+                if(!DateTime.TryParse(spDate, out Date) ||
+                   !double.TryParse(spReproduction, NumberStyles.Any, CultureInfo.CurrentCulture, out Reproduction) ||
+                   !double.TryParse(spReproduction7Day, NumberStyles.Any, CultureInfo.CurrentCulture, out Reproduction7Day)) {
                     Date = DateTime.MinValue;
                     Reproduction = float.MinValue;
                     Reproduction7Day = float.MinValue;
@@ -82,7 +80,7 @@ namespace LogicLink.Corona {
                         // Column A (0):  Datum des Erkrankungsbeginns
                         // Column H (7):  Punktschätzer der Reproduktionszahl R
                         // Column K (10): Punktschätzer des 7-Tage-R Wertes
-                        Record rec = new Record(cells[0].CellValue?.Text, cells[7].CellValue?.Text, cells[10].CellValue?.Text);
+                        Record rec = new Record(cells[0].GetValue(wbp), cells[7].GetValue(wbp), cells[10].GetValue(wbp));
 
                         if(rec.Date != DateTime.MinValue)
                             yield return rec;

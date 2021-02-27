@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace LogicLink.Corona {
 
@@ -19,10 +22,15 @@ namespace LogicLink.Corona {
         /// </summary>
         /// <remarks>
         /// The IComparable interface is neccessary for sorting of the DataTable column in <see cref="DataGrid"/>.
+        /// Date struct has to be public for serializing DataTable with WriteXml <see cref="ToDataTable(Chart)"/>.
         /// </remarks>
-        private struct Date : IComparable {
-            public readonly DateTime Value;
-            public Date(DateTime dt) => this.Value = dt;
+        //[Serializable]
+        public struct Date : IComparable, IXmlSerializable {
+            DateTime _dt;
+
+            public DateTime Value => _dt;
+
+            public Date(DateTime dt) => _dt = new DateTime(dt.Year, dt.Month, dt.Day);
 
             public override string ToString() => this.Value.ToString("d");
             public string ToString(IFormatProvider provider) => this.Value.ToString("d", provider);
@@ -32,18 +40,30 @@ namespace LogicLink.Corona {
             #region IComparable
             public int CompareTo(object obj) => Value.CompareTo((obj is Date d) ? d.Value : default);
             #endregion
-        }
 
+            public XmlSchema GetSchema() => null;
+
+            public void ReadXml(XmlReader reader) {
+                _dt = reader.ReadContentAsDateTime();
+            }
+
+            public void WriteXml(XmlWriter writer) {
+                writer.WriteStartElement("Value");
+                writer.WriteValue(_dt);
+                writer.WriteEndElement();
+            }
+        }
 
         /// <summary>
         /// Time component of a DateTime type
         /// </summary>
         /// <remarks>
         /// The IComparable interface is neccessary for sorting of the DataTable column in a WPF <see cref="DataGrid"/>.
+        /// Time struct has to be public for serializing DataTable with WriteXml <see cref="ToDataTable(Chart)"/>.
         /// </remarks>
-        private struct Time : IComparable {
+        public struct Time : IComparable {
             public readonly DateTime Value;
-            public Time(DateTime dt) => this.Value = dt;
+            public Time(DateTime dt) => this.Value = new DateTime(DateTime.MinValue.Year, DateTime.MinValue.Month, DateTime.MinValue.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
             public override string ToString() => this.Value.ToString("t");
             public string ToString(IFormatProvider provider) => this.Value.ToString("t", provider);
             public string ToString(string format) => this.Value.ToString(format);
@@ -79,33 +99,34 @@ namespace LogicLink.Corona {
         /// Writes a string to a <see cref="StreamWriter"/> and escapes the string with leading and closing double quotes if neccessary
         /// </summary>
         /// <param name="w">Stream writeer</param>
-        /// <param name="sEscape">Escape, if these characters occur</param>
+        /// <param name="sEscapes">Escape, if these strings occur</param>
         /// <param name="s">String to write</param>
         /// <returns>Awaitable Task</returns>
-        private static async Task WriteEscapedAsync(this StreamWriter w, string sEscape, string s) {
+        private static async Task WriteEscapedAsync(this StreamWriter w, string[] sEscapes, string s) {
             if(string.IsNullOrEmpty(s)) return;
-            if(s.Contains(sEscape, StringComparison.InvariantCulture)) {
-                await w.WriteAsync('"');
-                await w.WriteAsync(s);
-                await w.WriteAsync('"');
-            } else {
-                await w.WriteAsync(s);
-            }
+            foreach(string sEscape in sEscapes)
+                if(s.Contains(sEscape, StringComparison.InvariantCulture)) {
+                    await w.WriteAsync('"');
+                    await w.WriteAsync(s);
+                    await w.WriteAsync('"');
+                    return;
+                }
+            await w.WriteAsync(s);
         }
 
         /// <summary>
         /// Writes an array of objects to a line with a <see cref="StreamWriter"/> and escapes objects with leading and closing double quotes if neccessary
         /// </summary>
         /// <param name="w">Stream writeer</param>
-        /// <param name="sEscape">Escape, if these characters occur</param>
+        /// <param name="sEscapes">Escape, if these characters occur</param>
         /// <param name="args">Parmaeter array</param>
         /// <returns>Awaitable Task</returns>
-        private static async Task WriteEscapedLineAsync(this StreamWriter w, string sEscape, params object[] args) {
+        private static async Task WriteEscapedLineAsync(this StreamWriter w, string[] sEscapes, params object[] args) {
             if(args.Length != 0) {
-                await w.WriteEscapedAsync(sEscape, args[0]?.ToString());
+                await w.WriteEscapedAsync(sEscapes, args[0]?.ToString());
                 for(int i = 1; i < args.Length; i++) {
                     await w.WriteAsync(';');
-                    await w.WriteEscapedAsync(sEscape, args[i]?.ToString());
+                    await w.WriteEscapedAsync(sEscapes, args[i]?.ToString());
                 }
             }
             await w.WriteAsync(w.NewLine);
@@ -120,10 +141,10 @@ namespace LogicLink.Corona {
         /// Use the <see cref="DataTable"/> for the display of dynamic columns in a WPF <see cref="DataGrid"/>.
         /// </remarks>
         public static DataTable ToDataTable(this Chart cht) {
-            DataTable tbl = new DataTable();
+            DataTable tbl = new DataTable { TableName = cht.Titles.FirstOrDefault()?.Text ?? (!string.IsNullOrEmpty(cht.Name) ? cht.Name : "Table") };
 
             if(cht.Series.Count != 0) {
-                DataColumn col = tbl.Columns.Add(!string.IsNullOrEmpty(cht.ChartAreas[0].AxisX.Title)
+                DataColumn col = tbl.Columns.Add(!string.IsNullOrEmpty(cht.ChartAreas.Count() > 0 ? cht.ChartAreas[0].AxisX.Title : default)
                                 ? cht.ChartAreas[0].AxisX.Title
                                 : cht.Series[0].XValueType == ChartValueType.Date ? "Date" : "X-Value");
                 col.DataType = cht.Series[0].XValueType.ToType();
@@ -180,9 +201,9 @@ namespace LogicLink.Corona {
                     using(StreamWriter w = new StreamWriter(fs, Encoding.UTF8)) {
                         int iPCount = 0;
 
-                        string sEscape = ";" + w.NewLine;
+                        string[] sEscapes = new [] { ";", w.NewLine };
                         
-                        await w.WriteEscapedAsync(sEscape, !string.IsNullOrEmpty(cht.ChartAreas[0].AxisX.Title)
+                        await w.WriteEscapedAsync(sEscapes, !string.IsNullOrEmpty(cht.ChartAreas[0].AxisX.Title)
                                                            ? cht.ChartAreas[0].AxisX.Title
                                                            : cht.Series[0].XValueType == ChartValueType.Date ? "Date" : "X-Value");
                         Dictionary<object, object[]> dic = new Dictionary<object, object[]>();
@@ -190,7 +211,7 @@ namespace LogicLink.Corona {
                         for(int i = 0; i < lSeries.Count; i++) {
                             Series ser = lSeries[i];
                             await w.WriteAsync(';');
-                            await w.WriteEscapedAsync(sEscape, ser.Name);
+                            await w.WriteEscapedAsync(sEscapes, ser.Name);
                             foreach(DataPoint pnt in ser.Points) {
                                 object o = ser.XValueType switch
                                 {
@@ -217,7 +238,7 @@ namespace LogicLink.Corona {
 
                         int iP = 0;
                         foreach(object o in dic.Keys.OrderBy(o => o)) {
-                            await w.WriteEscapedLineAsync(sEscape, dic[o]);
+                            await w.WriteEscapedLineAsync(sEscapes, dic[o]);
                             if(iPCount != 25 * ++iP / dic.Count) {
                                 iPCount = 25 * iP / dic.Count;
                                 p?.Report(4 * iPCount);
