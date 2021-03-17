@@ -22,10 +22,12 @@ namespace LogicLink.Corona {
         /// </summary>
         /// <remarks>
         /// The IComparable interface is neccessary for sorting of the DataTable column in <see cref="DataGrid"/>.
-        /// Date struct has to be public for serializing DataTable with WriteXml <see cref="ToDataTable(Chart)"/>.
+        /// Serializing of custom types with DataTable.WriteXml is possible but DataTable.ReadXml will fail with 
+        /// "System.InvalidOperationException : Type '<Type Name>, Version=<n.n.n.n>, Culture=<culture>, PublicKeyToken=<token value>' 
+        /// is not allowed here. See https://go.microsoft.com/fwlink/?linkid=2132227 for more details.
+        /// see https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/dataset-datatable-dataview/security-guidance.
         /// </remarks>
-        //[Serializable]
-        public struct Date : IComparable, IXmlSerializable {
+        private struct Date : IComparable {
             DateTime _dt;
 
             public DateTime Value => _dt;
@@ -40,18 +42,6 @@ namespace LogicLink.Corona {
             #region IComparable
             public int CompareTo(object obj) => Value.CompareTo((obj is Date d) ? d.Value : default);
             #endregion
-
-            public XmlSchema GetSchema() => null;
-
-            public void ReadXml(XmlReader reader) {
-                _dt = reader.ReadContentAsDateTime();
-            }
-
-            public void WriteXml(XmlWriter writer) {
-                writer.WriteStartElement("Value");
-                writer.WriteValue(_dt);
-                writer.WriteEndElement();
-            }
         }
 
         /// <summary>
@@ -59,9 +49,12 @@ namespace LogicLink.Corona {
         /// </summary>
         /// <remarks>
         /// The IComparable interface is neccessary for sorting of the DataTable column in a WPF <see cref="DataGrid"/>.
-        /// Time struct has to be public for serializing DataTable with WriteXml <see cref="ToDataTable(Chart)"/>.
+        /// Serializing of custom types with DataTable.WriteXml is possible but DataTable.ReadXml will fail with 
+        /// "System.InvalidOperationException : Type '<Type Name>, Version=<n.n.n.n>, Culture=<culture>, PublicKeyToken=<token value>' 
+        /// is not allowed here. See https://go.microsoft.com/fwlink/?linkid=2132227 for more details.
+        /// see https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/dataset-datatable-dataview/security-guidance.
         /// </remarks>
-        public struct Time : IComparable {
+        private struct Time : IComparable {
             public readonly DateTime Value;
             public Time(DateTime dt) => this.Value = new DateTime(DateTime.MinValue.Year, DateTime.MinValue.Month, DateTime.MinValue.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
             public override string ToString() => this.Value.ToString("t");

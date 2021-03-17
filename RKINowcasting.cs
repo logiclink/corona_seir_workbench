@@ -45,8 +45,8 @@ namespace LogicLink.Corona {
             /// <param name="spReproduction7Day">Average of 7 days of the basic reproduction number (R₀) as <see cref="ReadOnlySpan<char>"/> or string in an invariant number format</param>
             public Record(ReadOnlySpan<char> spDate, ReadOnlySpan<char> spReproduction, ReadOnlySpan<char> spReproduction7Day) {
                 if(!DateTime.TryParse(spDate, out Date) ||
-                   !double.TryParse(spReproduction, NumberStyles.Any, CultureInfo.CurrentCulture, out Reproduction) ||
-                   !double.TryParse(spReproduction7Day, NumberStyles.Any, CultureInfo.CurrentCulture, out Reproduction7Day)) {
+                   !double.TryParse(spReproduction, NumberStyles.Any, spReproduction.Contains('.') ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture, out Reproduction) ||
+                   !double.TryParse(spReproduction7Day, NumberStyles.Any, spReproduction7Day.Contains('.') ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture, out Reproduction7Day)) {
                     Date = DateTime.MinValue;
                     Reproduction = float.MinValue;
                     Reproduction7Day = float.MinValue;
@@ -59,7 +59,7 @@ namespace LogicLink.Corona {
             /// Returns a string that represents the current object.
             /// </summary>
             /// <returns>A string that represents the current object.</returns>
-            public override string ToString() => $"{Date}\t{Reproduction:N2}";
+            public override string ToString() => $"{Date} {Reproduction:N2}";
         }
 
         /// <summary>

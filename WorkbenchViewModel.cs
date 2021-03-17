@@ -8,7 +8,6 @@ namespace LogicLink.Corona {
     /// <summary>
     /// ViewModel of the workbench with all workbench settings
     /// </summary>
-    // TODO: MM210104 1. End immer aktueller Monat + 1 als Standardwerts, es sei den ein anderer Wert wurde gespeichert.
     public class WorkbenchViewModel : INotifyPropertyChanged {
 
         #region Private Variables

@@ -35,9 +35,10 @@ namespace LogicLink.Corona {
 
         private Progress _pgr = new Progress();
         private System.Timers.Timer _tmr = new System.Timers.Timer(250);
-        private bool _bUpdateReproduction = false;
-        private bool _bUpdateVaccination = false;
-        private bool _bManualVaccination = false;
+        private bool _bUpdateReproduction = false;                          // True, if basic reproduction numbers (R₀) should be re-calculated
+        private bool _bUpdateVaccination = false;                           // True, if vaccinations should be re-calculated
+        private bool _bUpdateDailyVaccination = true;                       // True, if the number of daily vaccinated people should be re-calculated from the last 7 days
+        private bool _bManualVaccination = false;                           // True, if OWID vaccination data should be ignored
 
         private Dictionary<DateTime, double> _dicReproduction;              // Dictionary of basic reproduction numbers (R₀) 
         private Dictionary<DateTime, int> _dicVaccinated;                   // Dictionary of vaccinates individuals per day
@@ -46,6 +47,7 @@ namespace LogicLink.Corona {
 
         private async Task UpdateReproductionAsync(WorkbenchViewModel vm) {
             _bUpdateReproduction = false;
+            bool bResetUpdating = !_bUpdating;
             _bUpdating = true;
 
             if(vm.SolveR0 || vm.SolveR0Interval) {
@@ -53,59 +55,40 @@ namespace LogicLink.Corona {
                     _pgr.Report(1, "Calculating basic reproduction numbers ...", true);
 
                     List<JHU.Record> lConfirmedRecords = await new JHU().GetDataAsync(vm.Country).ToListAsync();
+                    _pgr.Report(2);
+
+                    DateTime dtStart = DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start);
+                    DateTime dtEnd = DateTimeHelper.Min(lConfirmedRecords[^1].Date, vm.End);
+
+                    List<int> lConfirmed = lConfirmedRecords.Skip((dtStart - lConfirmedRecords[0].Date).Days).Take((dtEnd - dtStart).Days + 1).Select(r => r.Confirmed).ToList();
                     _pgr.Report(3);
 
                     List<OWID.Record> lVaccinatedRecords = await new OWID().GetDataAsync(vm.Country).ToListAsync();
-                    _pgr.Report(5);
-
-                    DateTime dtStart;
+                    _pgr.Report(4);
 
                     if(lVaccinatedRecords.Any()) {
                         SEIRV seirvR0 = new SEIRV(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction, vm.Effectiveness, vm.ProtectionStartPeriod);
+                        _pgr.Report(5);
 
-                        // TODO MM210217 HIER WEITERMACHEN UND ProtectionStartPeriod als Zeitversatz bei den geimpften Personen berücksichtigen
-                        //               HIER WÄRE EIN ALLGEMEINER MECHANISMUS ZUM "ALLIGNEN" VON SQUENZEN SINNVOLL
-
-                        // Align model with confirmed numbers
-                        int iStartVacDif = (lVaccinatedRecords[0].Date - vm.Start).Days;
-                        int h;
-                        for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++) {
-                            h = i - iStartVacDif - 1;
-                            if(h >= 0 && h < lVaccinatedRecords.Count)
-                                seirvR0.Vaccinated = lVaccinatedRecords[h].Vaccinated;
+                        // Align model to confirmed numbers
+                        // REMARKS: There can't be any vaccination data because it's aligned to confirmed numbers
+                        for(int i = 1; i <= (dtStart - vm.Start).Days; i++)
                             seirvR0.Calc(i);
-                        }
                         _pgr.Report(6);
 
-                        // Generate List of confirmed cases
-                        List<int> lConfirmed = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
+                        // Align vaccinated individuals with confirmed cases
+                        // REMARKS: For future vaccinations the average of the daily vaccinations in the last 5 days is calculated
+                        List<int> lVaccinated = OWID.Record.AlignVaccinated(lVaccinatedRecords,
+                                                                            dtStart, 0,
+                                                                            dtEnd, (int)Math.Round(lVaccinatedRecords.TakeLast(7).Select(r => r.DailyVaccinated).Average())).ToList();
                         _pgr.Report(7);
 
-                        // Generate List of vaccinated individuals
-                        List<int> lVaccinated = new List<int>();
-
-                        // Add zero values for confirmed values before vaccination started
-                        for(int i = 0; i < (lVaccinatedRecords[0].Date - DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start)).Days; i++)
-                            lVaccinated.Add(0);
-
-                        // Add the overlapping date range
-                        int iVacConDif = (DateTimeHelper.Max(lConfirmedRecords[0].Date, vm.Start) - lVaccinatedRecords[0].Date).Days;
-                        lVaccinated.AddRange(lVaccinatedRecords.Skip(iVacConDif)
-                                                               .Take(iVacConDif < 0 ? iVacConDif + lConfirmed.Count : lConfirmed.Count)
-                                                               .Select(r => r.Vaccinated));
-
-                        // Fill vaccinated list with last value until the number of confirmed is reached
-                        for(int i = 0; i < lConfirmed.Count - lVaccinated.Count; i++)
-                            lVaccinated.Add(lVaccinated[^1]);
-                        _pgr.Report(8);
-
-                        Progress pgrR0 = new Progress(9, 89);
+                        Progress pgrR0 = new Progress(8, 90);
                         pgrR0.Changed += _pgr_Changed;
 
                         // Create dictionary of R₀ values per date
                         _dicReproduction = new Dictionary<DateTime, double>();
                         int j = 0;
-                        dtStart = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
                         IR0Solver slr = vm.SolveR0 
                                         ? new SEIRVR0Solver(vm.SolveR0ResidualDayWindow) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated } as IR0Solver
                                         : new SEIRVR0IntervalSolver(vm.SolveR0IntervalDays) { SEIRV = seirvR0, Confirmed = lConfirmed, Vaccinated = lVaccinated };
@@ -119,10 +102,9 @@ namespace LogicLink.Corona {
                         SEIR seirR0 = new SEIR(vm.Population, vm.Infectious, vm.IncubationPeriod, vm.InfectiousPeriod, vm.Reproduction);
                         _pgr.Report(5);
 
-                        // Align confirmed numbers with model
-                        for(int i = 1; i <= (lConfirmedRecords[0].Date - vm.Start).Days; i++)
+                        // Align model to confirmed numbers
+                        for(int i = 1; i <= (dtStart - vm.Start).Days; i++)
                             seirR0.Calc(i);
-                        List<int> ll = lConfirmedRecords.Skip((vm.Start - lConfirmedRecords[0].Date).Days).Select(r => r.Confirmed).ToList();
                         _pgr.Report(6);
 
                         Progress pgrR0 = new Progress(7, 91);
@@ -131,10 +113,9 @@ namespace LogicLink.Corona {
                         // Create dictionary of R₀ values per date
                         _dicReproduction = new Dictionary<DateTime, double>();
                         int j = 0;
-                        dtStart = lConfirmedRecords[0].Date < vm.Start ? vm.Start : lConfirmedRecords[0].Date;
                         IR0Solver slr = vm.SolveR0
-                                        ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = ll } as IR0Solver
-                                        : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = ll };
+                                        ? new SEIRR0Solver(vm.SolveR0ResidualDayWindow) { SEIR = seirR0, Confirmed = lConfirmed } as IR0Solver
+                                        : new SEIRR0IntervalSolver(vm.SolveR0IntervalDays) { SEIR = seirR0, Confirmed = lConfirmed };
                         foreach(double d in slr.Solve(pgrR0))
                             _dicReproduction.Add(dtStart.AddDays(j++), d);
 
@@ -143,61 +124,68 @@ namespace LogicLink.Corona {
 
                     _pgr.Report(99);
 
-                    // Calculate R₀ median of last 5 days
-                    double dR0Sum = 0d;
-                    for(int i = _dicReproduction.Count - 5; i < _dicReproduction.Count; i++)
-                        dR0Sum += _dicReproduction[dtStart.AddDays(i)];
-                    //for(DateTime dtFuture = dt.AddDays(j); dtFuture <= vm.End; dtFuture = dtFuture.AddDays(1))
-                    //    _dicReproduction.Add(dtFuture, dR0Sum / 5);
-                    vm.Reproduction = dR0Sum / 5;
+                    // Calculate R₀ average of last 5 days
+                    vm.Reproduction = _dicReproduction.Values.TakeLast(5).Average();
 
                     _pgr.Report(100);
 
-            } catch(Exception ex) {
-                MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
-            }
-        } else
+                } catch(Exception ex) {
+                    MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }
+            } else
                 _dicReproduction = null;
 
-            _bUpdating = false;
+            if(bResetUpdating)
+                _bUpdating = false;
         }
 
         private async Task UpdateVaccinationAsync(WorkbenchViewModel vm) {
             _bUpdateVaccination = false;
+            bool bResetUpdating = !_bUpdating;
             _bUpdating = true;
 
             try {
                 _pgr.Report(1, "Calculating vaccination numbers ...", true);
 
-                List<OWID.Record> l = await new OWID().GetDataAsync(vm.Country).ToListAsync();
+                List<OWID.Record> lVaccinatedRecords = null;
+                if(!_bManualVaccination)
+                    lVaccinatedRecords = await new OWID().GetDataAsync(vm.Country).ToListAsync();
+                _dicVaccinated = new Dictionary<DateTime, int>();
                 _pgr.Report(30);
-                if(!_bManualVaccination) {
-                    if(l.Count != 0) {                                                                              // Calculate vaccination parameter from vaccinated values
-                        vm.VaccinationStart = l[0].Date;
-                        vm.DailyVaccinated = (int)Math.Round((double)l[^1].Vaccinated / l.Count);
-                    } else
-                        vm.ResetVaccinated();
-                }
 
-                if(vm.DailyVaccinated != 0 && vm.VaccinationStart >= vm.Start && vm.VaccinationStart <= vm.End) {   // Calculate vaccinated values per date
-                    _dicVaccinated = new Dictionary<DateTime, int>();
-                    int iVaccinated = vm.DailyVaccinated;
-                    for(DateTime dt = vm.VaccinationStart; dt <= vm.End; dt = dt.AddDays(1)) {
+                if(lVaccinatedRecords?.Count > 0 && vm.VaccinationStart == lVaccinatedRecords[0].Date) {    // Calculate vaccination parameter from OWID vaccinated values
+                    vm.VaccinationStart = lVaccinatedRecords[0].Date;
+                    if(_bUpdateDailyVaccination) {
+                        vm.DailyVaccinated = (int)Math.Round(lVaccinatedRecords.TakeLast(7).Select(r => r.DailyVaccinated).Average());
+                        _bUpdateDailyVaccination = false;
+                    }
+
+                    // Align vaccinated individuals with confirmed cases
+                    // REMARKS: For future vaccinations the average of the daily vaccinations in the last 5 days is calculated
+                    DateTime dt = vm.VaccinationStart;
+                    foreach(int iVaccinated in OWID.Record.AlignVaccinated(lVaccinatedRecords,
+                                                                    vm.VaccinationStart, 0,
+                                                                    vm.End, vm.DailyVaccinated)) {
                         _dicVaccinated.Add(dt, iVaccinated);
-                        iVaccinated += vm.DailyVaccinated;
+                        dt = dt.AddDays(1);
                         _pgr.Report(30 + (dt - vm.VaccinationStart).Days / (vm.End - vm.VaccinationStart).Days * 69);
                     }
-                } else
-                    _dicVaccinated = null;
-
+                } else if(vm.VaccinationStart <= vm.End && vm.DailyVaccinated > 0) {                        // Calculate vaccination parameter from manual values
+                    int iVaccinated = 0;
+                    for(DateTime dt = vm.VaccinationStart; dt <= vm.End; dt = dt.AddDays(1)) {
+                        _dicVaccinated.Add(dt, iVaccinated += vm.DailyVaccinated);
+                        _pgr.Report(30 + (dt - vm.VaccinationStart).Days / (vm.End - vm.VaccinationStart).Days * 69);
+                    }
+                }
                 _pgr.Report(100);
             } catch(Exception ex) {
                 MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
 
-            _bUpdating = false;
+            if(bResetUpdating)
+                _bUpdating = false;
         }
 
         private void InitChart() {
@@ -236,9 +224,10 @@ namespace LogicLink.Corona {
         }
 
         private async Task UpdateChartAsync(WorkbenchViewModel vm) {
+            bool bResetUpdating = !_bUpdating;
             _bUpdating = true;
 
-            //try {
+            try {
                 _pgr.Report(1, "Calculating chart series ...", true);
 
                 // 1. Calculate SEIR model and create series
@@ -318,11 +307,13 @@ namespace LogicLink.Corona {
                 cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
             
                 _pgr.Report(100, "Ready", false);
-            //} catch(Exception ex) {
-            //    MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-            //    Close();
-            //}
-            _bUpdating = false;
+            } catch(Exception ex) {
+                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+
+            if(bResetUpdating)
+                _bUpdating = false;
         }
 
         /// <summary>
@@ -477,6 +468,7 @@ namespace LogicLink.Corona {
             _bUpdateVaccination = true;
 
             vm.Reset();
+            _bUpdateDailyVaccination = true;
             _bManualVaccination = false;
         }
 
@@ -487,6 +479,8 @@ namespace LogicLink.Corona {
             _bUpdateVaccination = true;
 
             vm.Clear();
+
+            _bUpdateDailyVaccination = true;
             _bManualVaccination = false;
         }
 
@@ -589,12 +583,14 @@ namespace LogicLink.Corona {
         
         private void _tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
             if(!_bUpdating) {
+                _bUpdating = true;
                 _tmr.Stop();
                 Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(_bUpdateReproduction)
                                                                                                 await UpdateReproductionAsync(this.DataContext as WorkbenchViewModel);
                                                                                              if(_bUpdateVaccination)
                                                                                                 await UpdateVaccinationAsync(this.DataContext as WorkbenchViewModel);
                                                                                              await UpdateChartAsync(this.DataContext as WorkbenchViewModel); 
+                                                                                             _bUpdating = false;
                                                                                            }));
             }
         }
@@ -608,11 +604,12 @@ namespace LogicLink.Corona {
 
             switch(e.PropertyName) {
                 case nameof(WorkbenchViewModel.Country):
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { _bUpdating = true;
-                                                                                                 await UpdatePopulationAsync(vm); 
+                    _bUpdating = true;
+                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdatePopulationAsync(vm); 
                                                                                                  await UpdateInfectiousAsync(vm);
                                                                                                  _bUpdating = false;
                                                                                                  _bUpdateReproduction = true;
+                                                                                                 _bUpdateDailyVaccination = true;
                                                                                                  _bManualVaccination = false;
                                                                                                  _bUpdateVaccination = true;
                                                                                                  _tmr.Start();
@@ -620,8 +617,8 @@ namespace LogicLink.Corona {
                     break;
 
                 case nameof(WorkbenchViewModel.Start):
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { _bUpdating = true;
-                                                                                                 await UpdateInfectiousAsync(vm);
+                    _bUpdating = true;
+                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdateInfectiousAsync(vm);
                                                                                                  _bUpdating = false;
                                                                                                  _bUpdateReproduction = true;
                                                                                                  _tmr.Start();
@@ -638,9 +635,11 @@ namespace LogicLink.Corona {
                 case nameof(WorkbenchViewModel.SolveR0ResidualDayWindow):
                 case nameof(WorkbenchViewModel.SolveR0IntervalDays):
                 case nameof(WorkbenchViewModel.Effectiveness):
-                    _bUpdateReproduction = true;
-                    _bUpdateVaccination = true;
-                    _tmr.Start();
+                    if(!_bUpdating) {
+                        _bUpdateReproduction = true;
+                        _bUpdateVaccination = true;
+                        _tmr.Start();
+                    }
                     break;
 
                 case nameof(WorkbenchViewModel.Reproduction):
@@ -649,6 +648,13 @@ namespace LogicLink.Corona {
                     break;
 
                 case nameof(WorkbenchViewModel.DailyVaccinated):
+                    if(!_bUpdating) {
+                        _bUpdateVaccination = true;
+                        _bManualVaccination = false;
+                        _tmr.Start();
+                    }
+                    break;
+
                 case nameof(WorkbenchViewModel.VaccinationStart):
                     if(!_bUpdating) {
                         _bUpdateVaccination = true;

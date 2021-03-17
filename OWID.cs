@@ -44,7 +44,6 @@ namespace LogicLink.Corona {
             /// <param name="s">Row of the CSV file</param>
             /// <returns>Tuple of country string and record</returns>
             public static (string Country, Record Record) FromString(string s, string sCountryPrevious = default, int iVaccinatedPrevious = 0) {
-                //Debug.WriteLine(s);
                 ReadOnlySpan<char> sp = s;
                 int i = 0;
 
@@ -79,6 +78,36 @@ namespace LogicLink.Corona {
                 i += j + 1;
 
                 return (sCountry, new Record(dtDate, iVaccinated, sCountry == sCountryPrevious ? iVaccinated - iVaccinatedPrevious : 0));
+            }
+
+            /// <summary>
+            /// Aligns an enumeration of <see cref="Record"/> objects to a start and end date.
+            /// </summary>
+            /// <param name="source">Enumeration of <see cref="Record"/> objects with continuous dates.</param>
+            /// <param name="dtStart">First date of the sequence of vaccinated people.</param>
+            /// <param name="iVaccinatedStart">Value of vaccinated people before the enumeration of <see cref="Record"/> objects starts</param>
+            /// <param name="dtEnd">Last date of the sequence of vaccinated people.</param>
+            /// <param name="iΔVaccinatedEnd">Delta per day of vaccinated people after the enumeration of <see cref="Record"/> objects ends. Starting value ist the last number of vaccinated people in the Enumeration of <see cref="Record"/> objects.</param>
+            /// <returns>enumeration of ints with vaccinated people</returns>
+            public static IEnumerable<int> AlignVaccinated(IEnumerable<Record> source, DateTime dtStart, int iVaccinatedStart, DateTime dtEnd, int iΔVaccinatedEnd) {
+                if(source == null || source.Count() == 0) {
+                    for(DateTime dt = dtStart; dt <= dtEnd; dt = dt.AddDays(1))
+                        yield return iVaccinatedStart;
+                } else {
+                    DateTime dtSourceFirst = source.First().Date;
+                    DateTime dtSourceLast = dtEnd;
+                    int iSourceVaccinatedLast = iVaccinatedStart;
+                    for(DateTime dt = dtStart; dt < dtSourceFirst; dt = dt.AddDays(1))
+                        yield return iVaccinatedStart;
+                    foreach(Record item in source)
+                        if(item.Date >= dtStart && item.Date <= dtEnd) {
+                            yield return item.Vaccinated;
+                            dtSourceLast = item.Date;
+                            iSourceVaccinatedLast = item.Vaccinated;
+                        }
+                    for(DateTime dt = dtSourceLast.AddDays(1); dt <= dtEnd; dt = dt.AddDays(1))
+                        yield return iSourceVaccinatedLast += iΔVaccinatedEnd;
+                }
             }
 
             #region Public readonly properties
@@ -116,7 +145,7 @@ namespace LogicLink.Corona {
             /// Returns a string that represents the current object.
             /// </summary>
             /// <returns>A string that represents the current object.</returns>
-            public override string ToString() => $"{Date}\t{Vaccinated}";
+            public override string ToString() => $"{Date} \t{Vaccinated}";
         }
 
         /// <summary>

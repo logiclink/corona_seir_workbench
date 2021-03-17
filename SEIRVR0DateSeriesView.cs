@@ -38,13 +38,13 @@ namespace LogicLink.Corona {
             if(bVaccinated)
                 _serVaccinated = new Series("Vaccinated") { ChartType = SeriesChartType.Spline,
                                                             XValueType = ChartValueType.Date,
-                                                            Color = Color.Green,
+                                                            Color = Color.PaleGreen,
                                                             BorderWidth = 5 };
 
             if(bDailyVaccinated)
                 _serDailyVaccinated = new Series("Daily Vaccinated") { ChartType = SeriesChartType.Column,
                                                                        XValueType = ChartValueType.Date,
-                                                                       Color = Color.Green,
+                                                                       Color = Color.PaleGreen,
                                                                        BorderWidth = 5 };        
         }
 
