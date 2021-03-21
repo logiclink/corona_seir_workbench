@@ -154,10 +154,10 @@ namespace LogicLink.Corona {
                 _dicVaccinated = new Dictionary<DateTime, int>();
                 _pgr.Report(30);
 
-                if(lVaccinatedRecords?.Count > 0 && vm.VaccinationStart == lVaccinatedRecords[0].Date) {    // Calculate vaccination parameter from OWID vaccinated values
-                    vm.VaccinationStart = lVaccinatedRecords[0].Date;
+                if(lVaccinatedRecords?.Count > 0 && (_bUpdateDailyVaccination || vm.VaccinationStart == lVaccinatedRecords[0].Date)) {    // Calculate vaccination parameter from OWID vaccinated values
                     if(_bUpdateDailyVaccination) {
                         vm.DailyVaccinated = (int)Math.Round(lVaccinatedRecords.TakeLast(7).Select(r => r.DailyVaccinated).Average());
+                        vm.VaccinationStart = lVaccinatedRecords[0].Date;
                         _bUpdateDailyVaccination = false;
                     }
 
@@ -610,8 +610,8 @@ namespace LogicLink.Corona {
                                                                                                  _bUpdating = false;
                                                                                                  _bUpdateReproduction = true;
                                                                                                  _bUpdateDailyVaccination = true;
-                                                                                                 _bManualVaccination = false;
                                                                                                  _bUpdateVaccination = true;
+                                                                                                 _bManualVaccination = false;
                                                                                                  _tmr.Start();
                                                                                                }));
                     break;
