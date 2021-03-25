@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -352,6 +353,7 @@ namespace LogicLink.Corona {
 
         public Workbench() {
             InitializeComponent();
+            this.Title = $"{this.Title} {Assembly.GetExecutingAssembly().GetName().Version}";
 
             _pgr.Changed += _pgr_Changed;
             _tmr.Elapsed += _tmr_Elapsed;

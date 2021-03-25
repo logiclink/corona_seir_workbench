@@ -515,8 +515,9 @@ namespace LogicLink.Corona {
         /// </summary>
         /// <param name="bShow">If false, show parameters are skipped</param>
         /// <param name="bLoadStartEnd">If false, start and end are not loaded</param>
-        public void Load(bool bShow = true, bool bLoadStartEnd = true) {
-            this.Country = Settings.Default.Country;
+        public void Load(bool bShow = true, bool bLoadCountry = true, bool bLoadStartEnd = true) {
+            if(bLoadCountry)
+                this.Country = Settings.Default.Country;
             this.Population = Settings.Default.Population;
             this.Infectious = Settings.Default.Infectious;
             this.IncubationPeriod = Settings.Default.IncubationPeriod;
@@ -604,23 +605,23 @@ namespace LogicLink.Corona {
         /// </summary>
         public void Reset() {
             Settings.Default.Reset();
-            Load();
+            Load(bLoadCountry:false);
         }
 
         /// <summary>
         /// Resets all changes to view model
         /// </summary>
-        public void ResetVaccinated() {
-            this.VaccinationStart = DateTime.Parse((string)Settings.Default.Properties[nameof(Settings.Default.VaccinationStart)].DefaultValue);
-            this.DailyVaccinated = int.Parse((string)Settings.Default.Properties[nameof(Settings.Default.DailyVaccinated)].DefaultValue);
-        }
+        //public void ResetVaccinated() {
+        //    this.VaccinationStart = DateTime.Parse((string)Settings.Default.Properties[nameof(Settings.Default.VaccinationStart)].DefaultValue);
+        //    this.DailyVaccinated = int.Parse((string)Settings.Default.Properties[nameof(Settings.Default.DailyVaccinated)].DefaultValue);
+        //}
 
         /// <summary>
         /// Clears the view model and shows no series
         /// </summary>
         public void Clear() {
             Settings.Default.Reset();
-            Load(false, false);
+            Load(bShow: false, bLoadCountry: false, bLoadStartEnd: false);
         }
 
         #endregion

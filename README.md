@@ -47,7 +47,7 @@ With this approach, susceptible individuals can still be infected after a vaccin
 ## Maths of the SEIR model
 In the SEIR model, changes of all compartments are calculated per time unit. Additionally, in the SEIRV model, the change between sub-compartment *V* and compartment *S* is determined before calculating the change in the SEIR compartments.
 
-In this first step, all vaccinated persons within compartment *S* are moved to sub-compartment *V*. A constant number of vaccinations per day is assumed. For this reason, the population number *N* is used as a reference value and multiplied by a constant factor:
+In this first step, all vaccinated persons within compartment *S* are moved to sub-compartment *V*. A constant number of vaccinated individuals per day is assumed. For this reason, the population number *N* is used as a reference value and multiplied by a constant factor:
 
 <p align="center"><img src="images/SEIRV%20delta%20Vaccinated.svg" alt="SEIRV ΔVaccinated"></p>
 
@@ -93,7 +93,7 @@ We used a class-based approach with C# for the Corona SEIR Workbench, because in
 
 For a graphical data output, we use the [Microsoft Windows Forms Charting](https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.datavisualization.charting)<sup>[8](#f8)</sup> Library, which comes with Visual Studio. The user interface was programmed in [XAML](https://en.wikipedia.org/wiki/Extensible_Application_Markup_Language) with the [Windows Presentation Foundation](https://en.wikipedia.org/wiki/Windows_Presentation_Foundation). Both were combined in a .Net Core 3.1 project.
 
-In order to present data from as many countries as possible, we use the infection data from the [CSSE](https://systems.jhu.edu/) of the Johns-Hopkins-University. This data is aggregated by [Datopian](https://datahub.io/core/covid-19) on a daily basis by country. For historical R₀ values of Germany we use the daily [nowcasting values](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx) published by the Robert Koch-Institute. We determine population data from the web API of the [World Bank](https://www.worldbank.org/). Daily vaccination data is retrieved from [Our World in Data](https://ourworldindata.org/covid-vaccinations) of the Oxford Martin School and University of Oxford. Data is downloaded from the web only once a day and then temporarily stored for further processing.
+In order to present data from as many countries as possible, we use the infection data from the [CSSE](https://systems.jhu.edu/) of the Johns-Hopkins-University. This data is aggregated by [Datopian](https://datahub.io/core/covid-19) on a daily basis by country. For historical R₀ values of Germany we use the daily [nowcasting values](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx) published by the Robert Koch-Institute. We determine population data from the web API of the [World Bank](https://www.worldbank.org/). Daily vaccination data is retrieved from [Our World in Data (OWID)](https://ourworldindata.org/covid-vaccinations) of the Oxford Martin School and University of Oxford. Data is downloaded from the web only once a day and then temporarily stored for further processing.
 
 A Python-based approach to SEIR modelling for SARS-COV-2 has been published by Pina Merkert<sup>[9](#f9)</sup> in Heise c't magazine. The Python code can be found on [Github](https://github.com/pinae/SEIR-fit).
 
@@ -115,7 +115,13 @@ Finally, from the last 5 days with historical data the average of the R₀ value
 
 Below the settings for the basic reproduction number, settings for vaccinations can be adjusted. The daily average and the start of the vaccination campaign are calculated from of the actual vaccination data. If no vaccinations have been carried out yet in the country, or if no data exist on vaccination for the country, default values are used. The average number of vaccinated persons per day can be changed via a slider.
 
-Additionally, the vaccination effectiveness can be changed. The vaccination effectiveness represents the proportion of vaccinated persons who can no longer be infected. Based on the approval data of Biontech and Moderna, an effectiveness of 95% is used by default. This value can be changed by a slider also. Finally, the start of the vaccination campaign can be entered or changed manually.
+Below the settings for the basic reproduction number, settings for vaccinated persons can be adjusted. From the OWID data on vaccinations, the start of the vaccination campaign and the daily average number of persons vaccinated are determined. For the future, the average value of vaccinated persons of the last 7 days is calculated and then added to the number of vaccinated individuals each day. The average number of vaccinated persons per day can be changed for the future with a slider. If vaccinations have not been carried out in the country or if data about vaccination does not exist, default values are used.
+
+Additionally, the vaccination effectiveness can be changed. The vaccination effectiveness represents the proportion of vaccinated persons who can no longer be infected. Based on the approval data of Biontech and Moderna, an effectiveness of 95% is used by default. This value can be changed by a slider also.
+
+Besides the start of the vaccinations, you can set the time period after how many days the protection of a vaccination will be effective. Although this is still a gross simplification, it provides a better calculation when vaccinations will have an influence on the R0 value. By default, the period is set to 14 days, which is the lower limit for a vaccine protection period. The value can be manually adjusted to show the impact on the developement of the epidemic.
+
+If the start of vaccinations differs from the OWID data, the historical OWID data is no longer applyed and the manually specified average number of vaccinated persons is used instead. With this setting, scenarios can be simulated with more or fewer vaccinations.
 
 In the lower part of the main window functions can be executed by buttons. "*Show Data*" displays a table with all data points from the chart. You can transfer them from the table to other applications like Microsoft Excel via the clipboard. With "*Export Chart*" you can export the chart in various formats or as a CSV file.
 
