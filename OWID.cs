@@ -49,10 +49,10 @@ namespace LogicLink.Corona {
 
                 int j = sp.QuotedIndexOf(',');
                 string sCountry = sp[i] == '"'
-                                  ? sp[i + j - 1] == '"'
+                                    ? sp[i + j - 1] == '"'
                                     ? new string(sp.Slice(i + 1, j - 2))
                                     : new string(sp.Slice(i + 1, j - 1))
-                                  : new string(sp.Slice(i, j));
+                                    : new string(sp.Slice(i, j));
                 i += j + 1;
 
                 switch(sCountry) {
@@ -74,7 +74,7 @@ namespace LogicLink.Corona {
                 i += j + 1;
 
                 j = sp[i..].QuotedIndexOf(',');
-                int iVaccinated = j > 0 ? int.Parse(sp.Slice(i, j)) : (iVaccinations != 0 ? iVaccinations : (sCountry == sCountryPrevious ? iVaccinatedPrevious : 0));
+                int iVaccinated = j > 0 ? (int)Math.Round(double.Parse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture)) : (iVaccinations != 0 ? iVaccinations : (sCountry == sCountryPrevious ? iVaccinatedPrevious : 0));
                 i += j + 1;
 
                 return (sCountry, new Record(dtDate, iVaccinated, sCountry == sCountryPrevious ? iVaccinated - iVaccinatedPrevious : 0));
