@@ -8,7 +8,7 @@ namespace LogicLink.Corona {
     /// </summary>
     /// <remarks>
     /// The <see cref="Solve(IProgress{int})"/> method iterates R₀ between 0 and 10 for every day of the SEIR model 
-    /// and calculates the squares of the residuals between the confirmed cases and the case number od the SEIR model.
+    /// and calculates the squares of the residuals between the confirmed cases and the case number of the SEIR model.
     /// See http://cow.physics.wisc.edu/~craigm/idl/Markwardt-MPFIT-Visualize2009.pdf for further details
     /// </remarks>
     public class SEIRVR0Solver : ISEIRVR0Solver {
@@ -47,15 +47,18 @@ namespace LogicLink.Corona {
             if(this.Confirmed.Count != this.Vaccinated.Count) throw new Exception("Number of elements in the list of confirmed cases is different to the number elements in the list of vaccinated individuals.");
 
             int iPCount = 0;
+            double dR0 = 0d;
             SEIRV seirvCalc = new SEIRV(this.SEIRV);
-            for(int i = 0; i < this.Confirmed.Count; i++) {
 
-                double dR0 = 0d;
+            // Calculate R₀ from the start to the last possible residual window
+            for(int i = 0; i < this.Confirmed.Count - _iResidualDayWindow + 1; i++) {
+
+                dR0 = 0d;
                 double dResidual = double.MaxValue;
                 for(double d = 0d; d < 10d; d = Math.Round(d + 0.1d, 1)) {
                     ISEIRV seirvResiduals = new SEIRV(seirvCalc) { Reproduction = d };
                     double r = 0d; ;
-                    for(int j = 1; j <= Math.Min(_iResidualDayWindow, this.Confirmed.Count - i); j++) {
+                    for(int j = 1; j <= _iResidualDayWindow; j++) {
                         seirvResiduals.Vaccinated = this.Vaccinated[i + j - 1];
                         seirvResiduals.Calc(j);
                         r += Math.Pow(this.Confirmed[i + j - 1] - seirvResiduals.Exposed - seirvResiduals.Infectious - seirvResiduals.Removed, 2);
@@ -72,6 +75,18 @@ namespace LogicLink.Corona {
                 seirvCalc.Vaccinated = this.Vaccinated[i];
                 seirvCalc.Calc(i);
                 
+                if(iPCount != 25 * i / this.Confirmed.Count) {
+                    iPCount = 25 * i / this.Confirmed.Count;
+                    p?.Report(4 * iPCount);
+                }
+            }
+
+            // Return R₀ for the days of the last residual window
+            // Remarks: The last calculated R₀ value gives the smallest error for the days of the residual window.
+            // Thus, this is the best guess of R₀ for these days. However, changes in R₀ in theses days are not considered.
+            for(int i = this.Confirmed.Count - _iResidualDayWindow + 1; i < this.Confirmed.Count; i++) {
+                yield return dR0;
+
                 if(iPCount != 25 * i / this.Confirmed.Count) {
                     iPCount = 25 * i / this.Confirmed.Count;
                     p?.Report(4 * iPCount);

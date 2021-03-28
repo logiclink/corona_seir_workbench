@@ -463,24 +463,31 @@ namespace LogicLink.Corona {
             vm.Save();
         }
 
-        private void btnReset_Click(object sender, RoutedEventArgs e) {
+        private async void btnReset_Click(object sender, RoutedEventArgs e) {
             if(!(this.DataContext is WorkbenchViewModel vm)) return;
 
             _bUpdateReproduction = true;
             _bUpdateVaccination = true;
 
             vm.Reset();
+
+            await UpdatePopulationAsync(vm);
+            await UpdateInfectiousAsync(vm);
+
             _bUpdateDailyVaccination = true;
             _bManualVaccination = false;
         }
 
-        private void btnClear_Click(object sender, RoutedEventArgs e) {
+        private async void btnClear_Click(object sender, RoutedEventArgs e) {
             if(!(this.DataContext is WorkbenchViewModel vm)) return;
 
             _bUpdateReproduction = true;
             _bUpdateVaccination = true;
 
             vm.Clear();
+
+            await UpdatePopulationAsync(vm);
+            await UpdateInfectiousAsync(vm);
 
             _bUpdateDailyVaccination = true;
             _bManualVaccination = false;

@@ -40,14 +40,18 @@ namespace LogicLink.Corona {
             if(!(this.Confirmed?.Count > 0)) yield break;
 
             int iPCount = 0;
+            double dR0 = 0d;
             SEIR seirCalc = new SEIR(this.SEIR);
-            for(int i = 0; i < this.Confirmed.Count; i++) {
-                double dR0 = 0d;
+
+            // Calculate R₀ from the start to the last possible residual window
+            for(int i = 0; i < this.Confirmed.Count - _iResidualDayWindow + 1; i++) {
+
+                dR0 = 0d;
                 double dResidual = double.MaxValue;
                 for(double d = 0.0d; d < 10d; d = Math.Round(d + 0.1d, 1)) {
                     ISEIR seirResiduals = new SEIR(seirCalc) { Reproduction = d };
                     double r = 0d; ;
-                    for(int j = 1; j <= Math.Min(_iResidualDayWindow, this.Confirmed.Count - i); j++) {
+                    for(int j = 1; j <= _iResidualDayWindow; j++) {
                         seirResiduals.Calc(j);
                         r += Math.Pow(this.Confirmed[i + j - 1] - seirResiduals.Exposed - seirResiduals.Infectious - seirResiduals.Removed, 2);
                     }
@@ -67,9 +71,21 @@ namespace LogicLink.Corona {
                     p?.Report(4 * iPCount);
                 }
             }
+
+            // Return R₀ for the days of the last residual window
+            // Remarks: The last calculated R₀ value gives the smallest error for the days of the residual window.
+            // Thus, this is the best guess of R₀ for these days. However, changes in R₀ in theses days are not considered.
+            for(int i = this.Confirmed.Count - _iResidualDayWindow + 1; i < this.Confirmed.Count; i++) {
+                yield return dR0;
+
+                if(iPCount != 25 * i / this.Confirmed.Count) {
+                    iPCount = 25 * i / this.Confirmed.Count;
+                    p?.Report(4 * iPCount);
+                }
+            }
         }
         #endregion
-    }
+        }
 
 
 }
