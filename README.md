@@ -119,7 +119,7 @@ Below the settings for the basic reproduction number, settings for vaccinated pe
 
 Additionally, the vaccination effectiveness can be changed. The vaccination effectiveness represents the proportion of vaccinated persons who can no longer be infected. Based on the approval data of Biontech and Moderna, an effectiveness of 95% is used by default. This value can be changed by a slider also.
 
-Besides the start of the vaccinations, you can set the time period after how many days the protection of a vaccination will be effective. Although this is still a gross simplification, it provides a better calculation when vaccinations will have an influence on the R0 value. By default, the period is set to 14 days, which is the lower limit for a vaccine protection period. The value can be manually adjusted to show the impact on the developement of the epidemic.
+Besides the start of the vaccinations, you can set the time period after how many days the protection of a vaccination will be effective. Although this is still a gross simplification, it provides a better calculation when vaccinations will have an influence on the R₀ value. By default, the period is set to 14 days, which is the lower limit for a vaccine protection period. The value can be manually adjusted to show the impact on the developement of the epidemic.
 
 If the start of vaccinations differs from the OWID data, the historical OWID data is no longer applyed and the manually specified average number of vaccinated persons is used instead. With this setting, scenarios can be simulated with more or fewer vaccinations.
 
