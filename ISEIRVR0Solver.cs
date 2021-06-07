@@ -20,7 +20,7 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Gets or sets a list of vaccinated individuals which are compared to the calculated SEIR case numbers
         /// </summary>
-        List<int> Vaccinated { get; set; }
+        List<double> Vaccinated { get; set; }
 
     }
 }

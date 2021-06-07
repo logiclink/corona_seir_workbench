@@ -28,7 +28,7 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Number of individuals in the V(accinated) compartment. This value is set manually.
         /// </summary>
-        int Vaccinated { get; set; }
+        double Vaccinated { get; set; }
 
         #endregion
 

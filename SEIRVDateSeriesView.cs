@@ -61,7 +61,7 @@ namespace LogicLink.Corona {
             int i7DaysToday = 0;
             for(DateTime dt = dtStart.AddDays(1d); dt <= dtEnd; dt = dt.AddDays(1d)) {
                 int iCases = _seir.Exposed + _seir.Infectious + _seir.Removed;
-                int iVaccinated = ((ISEIRV)_seir).Vaccinated;
+                double dVaccinated = ((ISEIRV)_seir).Vaccinated;
                 int iDays = (dt - dtStart).Days;
 
                 _seir.Calc(iDays);
@@ -114,7 +114,7 @@ namespace LogicLink.Corona {
                     _serVaccinated.Points.AddXY(dt, ((ISEIRV)_seir).Vaccinated);
 
                 if(_serDailyVaccinated != null)
-                    _serDailyVaccinated.Points.AddXY(dt, Math.Max(((ISEIRV)_seir).Vaccinated - iVaccinated, 0));
+                    _serDailyVaccinated.Points.AddXY(dt, Math.Max(((ISEIRV)_seir).Vaccinated - dVaccinated, 0));
 
                 if(_bDoubledMarker && dt == DateTime.Today) {
                     iCasesToday = _seir.Exposed + _seir.Infectious + _seir.Removed;

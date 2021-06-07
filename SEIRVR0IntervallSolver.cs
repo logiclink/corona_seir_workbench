@@ -36,7 +36,7 @@ namespace LogicLink.Corona {
         /// <summary>
         /// Gets or sets a list of vaccinated individuals. Must have the same number of elements as the <see cref="confirmed"/> list.
         /// </summary>
-        public List<int> Vaccinated { get; set; }
+        public List<double> Vaccinated { get; set; }
 
         /// <summary>
         /// Solves the R₀ number for a given SEIR model by comparing calculated cases with a list of confiremd cases.

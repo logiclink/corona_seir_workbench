@@ -12,7 +12,7 @@ namespace LogicLink.Corona {
     /// Charting series view of a SEIRV object and R₀-values. X-axis is a time range.
     /// </summary>
     public class SEIRVR0DateSeriesView : SEIRR0DateSeriesView {
-        protected readonly Dictionary<DateTime, int> _dicVaccinated;    // Dictionary of basic reproduction numbers (R₀). For missing dates the initial R₀ of the SEIR object is used.
+        protected readonly Dictionary<DateTime, double> _dicVaccinated; // Dictionary of basic reproduction numbers (R₀). For missing dates the initial R₀ of the SEIR object is used.
 
         private readonly Series _serVaccinated;                         // Series of the number of individuals in the V(accinated) compartment
         private readonly Series _serDailyVaccinated;                    // Series of the number of vaccinated individuals for the day ( Vaccinated - Vaccinated of the previous day )
@@ -33,7 +33,7 @@ namespace LogicLink.Corona {
         /// <param name="bDoubledMarker">If true, double value diamond markers are added to cases-, daily- and 7days-series</param>
         /// <param name="bVaccinated">If true, vaccinated-series is shown</param>
         /// <param name="bDailyVaccinated">If true, daily vaccinated-series is shown</param>
-        public SEIRVR0DateSeriesView(ISEIRV seirv, Dictionary<DateTime, double> dicReproduction, Dictionary<DateTime, int> dicVaccinated, bool bSusceptible = true, bool bExposed = true, bool bInfectious = true, bool bRemoved = true, bool bCases = true, bool bDaily = true, bool b7Days = true, bool bReproduction = true, bool bDoubledMarker = true, bool bVaccinated = true, bool bDailyVaccinated = true) : base(seirv, dicReproduction, bSusceptible, bExposed, bInfectious, bRemoved, bCases, bDaily, b7Days, bReproduction, bDoubledMarker) {
+        public SEIRVR0DateSeriesView(ISEIRV seirv, Dictionary<DateTime, double> dicReproduction, Dictionary<DateTime, double> dicVaccinated, bool bSusceptible = true, bool bExposed = true, bool bInfectious = true, bool bRemoved = true, bool bCases = true, bool bDaily = true, bool b7Days = true, bool bReproduction = true, bool bDoubledMarker = true, bool bVaccinated = true, bool bDailyVaccinated = true) : base(seirv, dicReproduction, bSusceptible, bExposed, bInfectious, bRemoved, bCases, bDaily, b7Days, bReproduction, bDoubledMarker) {
             _dicVaccinated = dicVaccinated;
             if(bVaccinated)
                 _serVaccinated = new Series("Vaccinated") { ChartType = SeriesChartType.Spline,
@@ -66,11 +66,11 @@ namespace LogicLink.Corona {
             int i7DaysToday = 0;
             for(DateTime dt = dtStart.AddDays(1d); dt <= dtEnd; dt = dt.AddDays(1d)) {
                 int iCases = _seir.Exposed + _seir.Infectious + _seir.Removed;
-                int iVaccinated = ((ISEIRV)_seir).Vaccinated;
+                double dVaccinated = ((ISEIRV)_seir).Vaccinated;
                 int iDays = (dt - dtStart).Days;
 
                 _seir.Reproduction = _dicReproduction.TryGetValue(dt, out double d) ? d : dReproduction;
-                ((ISEIRV)_seir).Vaccinated = _dicVaccinated.TryGetValue(dt, out int j) ? j : ((ISEIRV)_seir).Vaccinated;
+                ((ISEIRV)_seir).Vaccinated = _dicVaccinated.TryGetValue(dt, out double j) ? j : ((ISEIRV)_seir).Vaccinated;
 
                 _seir.Calc(iDays);
 
@@ -121,7 +121,7 @@ namespace LogicLink.Corona {
                     _serVaccinated.Points.AddXY(dt, ((ISEIRV)_seir).Vaccinated);
 
                 if(_serDailyVaccinated != null)
-                    _serDailyVaccinated.Points.AddXY(dt, Math.Max(((ISEIRV)_seir).Vaccinated - iVaccinated, 0));
+                    _serDailyVaccinated.Points.AddXY(dt, Math.Max(((ISEIRV)_seir).Vaccinated - dVaccinated, 0));
 
                 if(_bDoubledMarker && dt == DateTime.Today) {
                     iCasesToday = _seir.Exposed + _seir.Infectious + _seir.Removed;

@@ -17,6 +17,9 @@ using Microsoft.Win32;
 
 namespace LogicLink.Corona {
 
+    // TODO: MM210605 1. Impfzahlen für Wales, etc NICHT zu GB hinzuaddieren
+    //                2. Fehlende Infektionszahlen fortschreiben (siehe Frankreich)
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -42,7 +45,7 @@ namespace LogicLink.Corona {
         private bool _bManualVaccination = false;                           // True, if OWID vaccination data should be ignored
 
         private Dictionary<DateTime, double> _dicReproduction;              // Dictionary of basic reproduction numbers (R₀) 
-        private Dictionary<DateTime, int> _dicVaccinated;                   // Dictionary of vaccinates individuals per day
+        private Dictionary<DateTime, double> _dicVaccinated;                // Dictionary of vaccinates individuals per day
 
         private bool _bUpdating = false;
 
@@ -79,9 +82,9 @@ namespace LogicLink.Corona {
 
                         // Align vaccinated individuals with confirmed cases
                         // REMARKS: For future vaccinations the average of the daily vaccinations in the last 5 days is calculated
-                        List<int> lVaccinated = OWID.Record.AlignVaccinated(lVaccinatedRecords,
-                                                                            dtStart, 0,
-                                                                            dtEnd, (int)Math.Round(lVaccinatedRecords.TakeLast(7).Select(r => r.DailyVaccinated).Average())).ToList();
+                        List<double> lVaccinated = OWID.Record.AlignVaccinated(lVaccinatedRecords,
+                                                                               dtStart, 0,
+                                                                               dtEnd, (int)Math.Round(lVaccinatedRecords.TakeLast(7).Select(r => r.DailyVaccinated).Average())).ToList();
                         _pgr.Report(7);
 
                         Progress pgrR0 = new Progress(8, 90);
@@ -152,7 +155,7 @@ namespace LogicLink.Corona {
                 List<OWID.Record> lVaccinatedRecords = null;
                 if(!_bManualVaccination)
                     lVaccinatedRecords = await new OWID().GetDataAsync(vm.Country).ToListAsync();
-                _dicVaccinated = new Dictionary<DateTime, int>();
+                _dicVaccinated = new Dictionary<DateTime, double>();
                 _pgr.Report(30);
 
                 if(lVaccinatedRecords?.Count > 0 && (_bUpdateDailyVaccination || vm.VaccinationStart == lVaccinatedRecords[0].Date)) {    // Calculate vaccination parameter from OWID vaccinated values
@@ -165,10 +168,10 @@ namespace LogicLink.Corona {
                     // Align vaccinated individuals with confirmed cases
                     // REMARKS: For future vaccinations the average of the daily vaccinations in the last 5 days is calculated
                     DateTime dt = vm.VaccinationStart;
-                    foreach(int iVaccinated in OWID.Record.AlignVaccinated(lVaccinatedRecords,
-                                                                    vm.VaccinationStart, 0,
-                                                                    vm.End, vm.DailyVaccinated)) {
-                        _dicVaccinated.Add(dt, iVaccinated);
+                    foreach(double dVaccinated in OWID.Record.AlignVaccinated(lVaccinatedRecords,
+                                                                              vm.VaccinationStart, 0,
+                                                                              vm.End, vm.DailyVaccinated)) {
+                        _dicVaccinated.Add(dt, dVaccinated);
                         dt = dt.AddDays(1);
                         _pgr.Report(30 + (dt - vm.VaccinationStart).Days / (vm.End - vm.VaccinationStart).Days * 69);
                     }

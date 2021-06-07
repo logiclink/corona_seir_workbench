@@ -43,7 +43,7 @@ namespace LogicLink.Corona {
             /// </summary>
             /// <param name="s">Row of the CSV file</param>
             /// <returns>Tuple of country string and record</returns>
-            public static (string Country, Record Record) FromString(string s, string sCountryPrevious = default, int iVaccinatedPrevious = 0) {
+            public static (string Country, Record Record) FromString(string s, string sCountryPrevious = default, double dVaccinatedPrevious = 0) {
                 ReadOnlySpan<char> sp = s;
                 int i = 0;
 
@@ -70,14 +70,14 @@ namespace LogicLink.Corona {
                 i += j + 1;
 
                 j = sp[i..].QuotedIndexOf(',');
-                int iVaccinations = j > 0 ? int.Parse(sp.Slice(i, j)) : 0;
+                double dVaccinations = j > 0 ? double.Parse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture) : 0;
                 i += j + 1;
 
                 j = sp[i..].QuotedIndexOf(',');
-                int iVaccinated = j > 0 ? (int)Math.Round(double.Parse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture)) : (iVaccinations != 0 ? iVaccinations : (sCountry == sCountryPrevious ? iVaccinatedPrevious : 0));
+                double dVaccinated = j > 0 ? double.Parse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture) : (dVaccinations != 0 ? dVaccinations : (sCountry == sCountryPrevious ? dVaccinatedPrevious : 0));
                 i += j + 1;
 
-                return (sCountry, new Record(dtDate, iVaccinated, sCountry == sCountryPrevious ? iVaccinated - iVaccinatedPrevious : 0));
+                return (sCountry, new Record(dtDate, dVaccinated, sCountry == sCountryPrevious ? (int)(dVaccinated - dVaccinatedPrevious) : 0));
             }
 
             /// <summary>
@@ -85,35 +85,35 @@ namespace LogicLink.Corona {
             /// </summary>
             /// <param name="source">Enumeration of <see cref="Record"/> objects with continuous dates.</param>
             /// <param name="dtStart">First date of the sequence of vaccinated people.</param>
-            /// <param name="iVaccinatedStart">Value of vaccinated people before the enumeration of <see cref="Record"/> objects starts</param>
+            /// <param name="dVaccinatedStart">Value of vaccinated people before the enumeration of <see cref="Record"/> objects starts</param>
             /// <param name="dtEnd">Last date of the sequence of vaccinated people.</param>
-            /// <param name="iΔVaccinatedEnd">Delta per day of vaccinated people after the enumeration of <see cref="Record"/> objects ends. Starting value ist the last number of vaccinated people in the Enumeration of <see cref="Record"/> objects.</param>
+            /// <param name="dΔVaccinatedEnd">Delta per day of vaccinated people after the enumeration of <see cref="Record"/> objects ends. Starting value ist the last number of vaccinated people in the Enumeration of <see cref="Record"/> objects.</param>
             /// <returns>enumeration of ints with vaccinated people</returns>
-            public static IEnumerable<int> AlignVaccinated(IEnumerable<Record> source, DateTime dtStart, int iVaccinatedStart, DateTime dtEnd, int iΔVaccinatedEnd) {
+            public static IEnumerable<double> AlignVaccinated(IEnumerable<Record> source, DateTime dtStart, double dVaccinatedStart, DateTime dtEnd, double dΔVaccinatedEnd) {
                 if(source == null || source.Count() == 0) {
                     for(DateTime dt = dtStart; dt <= dtEnd; dt = dt.AddDays(1))
-                        yield return iVaccinatedStart;
+                        yield return dVaccinatedStart;
                 } else {
                     DateTime dtSourceFirst = source.First().Date;
                     DateTime dtSourceLast = dtEnd;
-                    int iSourceVaccinatedLast = iVaccinatedStart;
+                    double dSourceVaccinatedLast = dVaccinatedStart;
                     for(DateTime dt = dtStart; dt < dtSourceFirst; dt = dt.AddDays(1))
-                        yield return iVaccinatedStart;
+                        yield return dVaccinatedStart;
                     foreach(Record item in source)
                         if(item.Date >= dtStart && item.Date <= dtEnd) {
                             yield return item.Vaccinated;
                             dtSourceLast = item.Date;
-                            iSourceVaccinatedLast = item.Vaccinated;
+                            dSourceVaccinatedLast = item.Vaccinated;
                         }
                     for(DateTime dt = dtSourceLast.AddDays(1); dt <= dtEnd; dt = dt.AddDays(1))
-                        yield return iSourceVaccinatedLast += iΔVaccinatedEnd;
+                        yield return dSourceVaccinatedLast += dΔVaccinatedEnd;
                 }
             }
 
             #region Public readonly properties
 
             public readonly DateTime Date;          // Date of the record
-            public readonly int Vaccinated;         // Total number of vaccinated individuals
+            public readonly double Vaccinated;      // Total number of vaccinated individuals. For "World" this exceeds Int32.MaxValue (2.147.483.647)
             public readonly int DailyVaccinated;    // Number of vaccinated individuals for the day
 
             #endregion
@@ -124,11 +124,11 @@ namespace LogicLink.Corona {
             /// Creates and initializes a new record
             /// </summary>
             /// <param name="dtDate">Date of the record</param>
-            /// <param name="iVaccinated">Total number of vaccinated individuals</param>
+            /// <param name="dVaccinated">Total number of vaccinated individuals</param>
             /// <param name="iDailyVaccinated">Number of vaccinated individuals for the day</param>
-            public Record(DateTime dtDate, int iVaccinated, int iDailyVaccinated) {
+            public Record(DateTime dtDate, double dVaccinated, int iDailyVaccinated) {
                 Date = dtDate;
-                Vaccinated = iVaccinated;
+                Vaccinated = dVaccinated;
                 DailyVaccinated = iDailyVaccinated;
             }
 
@@ -136,8 +136,8 @@ namespace LogicLink.Corona {
             /// Creates and initializes a new record without daily individuals
             /// </summary>
             /// <param name="dtDate">Date of the record</param>
-            /// <param name="iVaccinated">Total number of vaccinated individuals</param>
-            public Record(DateTime dtDate, int iVaccinated) : this(dtDate, iVaccinated, 0) { }
+            /// <param name="dVaccinated">Total number of vaccinated individuals</param>
+            public Record(DateTime dtDate, double dVaccinated) : this(dtDate, dVaccinated, 0) { }
 
             #endregion
 
@@ -174,47 +174,6 @@ namespace LogicLink.Corona {
                                     dic[s] = new List<Record> { r };
                             }
                         }
-
-                        // HACK: Sum UK
-                        if(!dic.TryGetValue("United Kingdom", out List<Record> lGB))
-                            lGB = new List<Record>();
-                        if(dic.TryGetValue("Northern Ireland", out List<Record> lNorthernIreland))  
-                            foreach(Record r in lNorthernIreland) {
-                                int i = lGB.IndexOf(lGB.FirstOrDefault(rr => rr.Date == r.Date));
-                                if(i != -1)
-                                    lGB[i] = new Record(r.Date, lGB[i].Vaccinated + r.Vaccinated, lGB[i].DailyVaccinated + r.DailyVaccinated);
-                                else
-                                    lGB.Add(new Record(r.Date, r.Vaccinated, r.DailyVaccinated));
-                        }                        
-                        if(dic.TryGetValue("Scotland", out List<Record> lScotland))
-                            foreach(Record r in lScotland) {
-                                int i = lGB.IndexOf(lGB.FirstOrDefault(rr => rr.Date == r.Date));
-                                if(i != -1)
-                                    lGB[i] = new Record(r.Date, lGB[i].Vaccinated + r.Vaccinated, lGB[i].DailyVaccinated + r.DailyVaccinated);
-                                else
-                                    lGB.Add(new Record(r.Date, r.Vaccinated, r.DailyVaccinated));
-                        }
-                        if(dic.TryGetValue("Wales", out List<Record> lWales))
-                            foreach(Record r in lWales) {
-                                int i = lGB.IndexOf(lGB.FirstOrDefault(rr => rr.Date == r.Date));
-                                if(i != -1)
-                                    lGB[i] = new Record(r.Date, lGB[i].Vaccinated + r.Vaccinated, lGB[i].DailyVaccinated + r.DailyVaccinated);
-                                else
-                                    lGB.Add(new Record(r.Date, r.Vaccinated, r.DailyVaccinated));
-                        }                            
-                        if(dic.TryGetValue("England", out List<Record> lEngland))
-                            foreach(Record r in lEngland) {
-                                int i = lGB.IndexOf(lGB.FirstOrDefault(rr => rr.Date == r.Date));
-                                if(i != -1)
-                                    lGB[i] = new Record(r.Date, lGB[i].Vaccinated + r.Vaccinated, lGB[i].DailyVaccinated + r.DailyVaccinated);
-                                else
-                                    lGB.Add(new Record(r.Date, r.Vaccinated, r.DailyVaccinated));
-                        }
-                        if(lGB.Count != 0) {
-                            lGB.Sort(new LogicLink.Corona.Comparer<Record>((r1, r2) => r1.Date.CompareTo(r2.Date)));
-                            dic["United Kingdom"] = lGB;
-                        }
-
                         _dic = dic;
                 } finally {
                     _sms.Release();
