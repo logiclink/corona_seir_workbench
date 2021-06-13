@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -58,7 +59,7 @@ namespace LogicLink.Corona {
 
                 int iDeaths = int.Parse(sp[i..]);
 
-                return (sCountry, new Record(dtDate, iConfirmed, sCountry == sCountryPrevious ? iConfirmed - iConfirmedPrevious : 0, iRecovered, iDeaths));
+                return (sCountry, new Record(dtDate, iConfirmed, sCountry == sCountryPrevious ? (iConfirmed - iConfirmedPrevious > 0 ? iConfirmed - iConfirmedPrevious : 0) : 0, iRecovered, iDeaths));
             }
 
             #region Public readonly properties
@@ -124,9 +125,11 @@ namespace LogicLink.Corona {
                             Record r = default;
                             while(!rd.EndOfStream) {
                                 (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Confirmed);
-                                if(dic.TryGetValue(s, out List<Record> l))
+                                if(dic.TryGetValue(s, out List<Record> l)) {
+                                    if((r.Date - l[^1].Date).TotalDays > 1 || (r.Confirmed == 0 && l[^1].Confirmed > 0))
+                                        Debug.WriteLine("ERROR IN DATA !!!");
                                     l.Add(r);
-                                else
+                                } else
                                     dic[s] = new List<Record> { r };
 
                         }
