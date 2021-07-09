@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -12,7 +11,6 @@ using System.Windows;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Windows.Threading;
 
-using DocumentFormat.OpenXml.Office2013.Excel;
 using Microsoft.Win32;
 
 namespace LogicLink.Corona {
@@ -250,13 +248,22 @@ namespace LogicLink.Corona {
                     pgrSeir.Changed -= _pgr_Changed;
                 }
 
-                // 2. Get JHE data and create series
+                // 2. Get JHU data and create series
                 JHU jhu = new JHU();
                 JHUDateSeriesView vJhu = new JHUDateSeriesView(jhu, vm.Country, vm.Population, vm.ShowConfirmed, vm.ShowDailyConfirmed, vm.Show7DaysConfirmed, vm.ShowRecovered, vm.ShowDeaths);
                 if(vm.ShowConfirmed || vm.ShowDailyConfirmed  || vm.Show7DaysConfirmed || vm.ShowRecovered || vm.ShowDeaths) {
                     Progress pgrJhu = new Progress(34, 19);
                     pgrJhu.Changed += _pgr_Changed;
-                    await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
+                    try {
+                        await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
+                    } catch(Exception ex) {
+                        MessageBox.Show($"Chart updating error because of an error in the JHU data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        vm.ShowConfirmed = false;
+                        vm.ShowDailyConfirmed = false;
+                        vm.Show7DaysConfirmed = false;
+                        vm.ShowRecovered = false;
+                        vm.ShowDeaths = false;
+                    }
                     pgrJhu.Changed -= _pgr_Changed;
                 }
 
@@ -266,7 +273,13 @@ namespace LogicLink.Corona {
                 if(vm.ShowConfirmedVaccinated || vm.ShowDailyConfirmedVaccinated) {
                     Progress pgrOwd = new Progress(54, 10);
                     pgrOwd.Changed += _pgr_Changed;
-                    await vOwid.CalcAsync(vm.Start, vm.End, pgrOwd);
+                    try {
+                        await vOwid.CalcAsync(vm.Start, vm.End, pgrOwd);
+                    } catch(Exception ex) {
+                        MessageBox.Show($"Chart updating error because of an error in the OWID data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        vm.ShowConfirmedVaccinated = false;
+                        vm.ShowDailyConfirmedVaccinated = false;
+                    }
                     pgrOwd.Changed -= _pgr_Changed;
                 }
 
@@ -276,7 +289,13 @@ namespace LogicLink.Corona {
                 if(vm.ShowNowcasting || vm.ShowNowcasting7Day) {
                     Progress pgrRnc = new Progress(65, 29);
                     pgrRnc.Changed += _pgr_Changed;
-                    await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
+                    try {
+                        await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
+                    } catch(Exception ex) {
+                        MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        vm.ShowNowcasting = false;
+                        vm.ShowNowcasting7Day = false;
+                    }
                     pgrRnc.Changed -= _pgr_Changed;
                 }
 

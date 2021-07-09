@@ -6,9 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace LogicLink.Corona {
 
