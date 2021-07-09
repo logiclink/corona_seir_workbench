@@ -194,7 +194,7 @@ Historische Infektionszahlen des [Center for Systems Science and Engineering](ht
 <p align="center"><sup>Klassen für den Abruf der Johns-Hopkins-University CSSE Daten</sup></p>
 
 Das *JHU*-Objekt speichert die abgerufenen Daten in einer temporären CSV-Datei zwischen und versucht diese möglichst schnell zu parsen.
-Den gleichen Ansatz verfolgt die *RKINowcasting*-Klasse, die die [Nowcasting-Excel-Liste](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx) des [Robert Koch-Instituts](https://www.rki.de/) einmal täglich herunterlädt und die Spalten „Punktschätzer der Reproduktionszahl R“, sowie „Punktschätzer des 7-Tage-R Wertes“ für ein Datum zurückgibt.
+Den gleichen Ansatz verfolgt die *RKINowcasting*-Klasse, die die [Nowcasting-CSV-Liste](https://github.com/robert-koch-institut/SARS-CoV-2-Nowcasting_und_-R-Schaetzung/blob/main/Nowcast_R_aktuell.csv) des [Robert Koch-Instituts](https://www.rki.de/) einmal täglich herunterlädt und die Spalten „Punktschätzer der Reproduktionszahl R“, sowie „Punktschätzer des 7-Tage-R Wertes“ für ein Datum zurückgibt.
 
 <p align="center"><img src="images/RKI%20Nowcasting%20Klassenmodell.svg" alt="Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten"></p>
 <p align="center"><sup>Klassen für den Abruf der Robert Koch-Institut Nowcasting-Daten</sup></p>

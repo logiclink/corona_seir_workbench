@@ -1,5 +1,5 @@
 # Corona SEIR Workbench [![German version](images/de.svg)](README.de.md)
-The [SARS-COV-2](https://en.wikipedia.org/wiki/Severe_acute_respiratory_syndrome_coronavirus_2) pandemic has been affecting our lives for months. The effectiveness of measures against the pandemic can be tested and predicted by using epidemiological models. The Corona SEIR Workbench uses a SEIR model and combines a graphical output of the results with a simple parameter input for the model. Modelled data can be compared country by country with the SARS-COV-2 infection data of the Johns Hopkins University. Additionally, the R₀ values of the Robert Koch Institute can be displayed for Germany.
+The [SARS-COV-2](https://en.wikipedia.org/wiki/Severe_acute_respiratory_syndrome_coronavirus_2) pandemic has been affecting our lives for months. The effectiveness of measures against the pandemic can be tested and predicted by using epidemiological models. The Corona SEIR Workbench uses a SEIR model and combines a graphical output of the results with a simple parameter input for the model. Modelled data can be compared country by country with the SARS-COV-2 infection data of the Johns Hopkins University. Additionally, the R₀ values of the Robert Koch-Institute can be displayed for Germany.
 
 ## Current status of the COVID-19 pandemic
 Since December 2019, the corona virus [SARS-COV-2](https://en.wikipedia.org/wiki/Severe_acute_respiratory_syndrome_coronavirus_2) and its [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) disease has been keeping the world in suspense with a [pandemic](https://en.wikipedia.org/wiki/Pandemic).Although, the occurrence of a comparable pandemic was only a matter of time. It is estimated that similar pandemics occur every 20-30 years<sup>[1](#f1)</sup>.
@@ -197,7 +197,7 @@ Historical infection data from the Johns-Hopkins [Center for Systems Science and
 
 The *JHU* object caches the retrieved data in a temporary CSV file and parses it as fast as possible.
 
-The same approach is used by the *RKINowcasting* class, which downloads the [Nowcasting Excel file](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx) of the [Robert Koch-Institute](https://www.rki.de/)  once a day and returns the columns "Point estimator of the reproduction number R", as well as "Point estimator of the 7-day R value" for dates.
+The same approach is used by the *RKINowcasting* class, which downloads the [Nowcasting csv file](https://github.com/robert-koch-institut/SARS-CoV-2-Nowcasting_und_-R-Schaetzung/blob/main/Nowcast_R_aktuell.csv) of the [Robert Koch-Institute](https://www.rki.de/)  once a day and returns the columns "Point estimator of the reproduction number R", as well as "Point estimator of the 7-day R value" for dates.
 
 <p align="center"><img src="images/RKI%20Nowcasting%20Klassenmodell.svg" alt="Classes for the loading of Robert Koch-Institute Nowcasting data"></p>
 <p align="center"><sup>Classes for the loading of Robert Koch-Institute Nowcasting data</sup></p>
