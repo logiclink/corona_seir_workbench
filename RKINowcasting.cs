@@ -24,11 +24,6 @@ namespace LogicLink.Corona {
             public readonly DateTime Date;
 
             /// <summary>
-            /// Punktschätzer der Reproduktionszahl R₀ (Column H)
-            /// </summary>
-            public readonly double Reproduction;
-
-            /// <summary>
             /// Punktschätzer des 7-Tage-R₀ Wertes (Column K)
             /// </summary>
             public readonly double Reproduction7Day;
@@ -55,21 +50,11 @@ namespace LogicLink.Corona {
                     i += j + 1;
                 }
 
-                // 4-day R₀-value
-                j = sp[i..].QuotedIndexOf(',');
-                if(!double.TryParse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture, out Reproduction))
-                    Reproduction = 0d;
-                i += j + 1;
-
-                // Ignore the next two columns with lower and upper bounds of the 4-days R₀ value
-                for(int k = 0; k < 2; k++) {
-                    j = sp[i..].QuotedIndexOf(',');
-                    i += j + 1;
-                }
-
                 // 7-day R₀-value
                 j = sp[i..].QuotedIndexOf(',');
-                if(!double.TryParse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture, out Reproduction7Day))
+                if(sp.Slice(i, j).Length == 0)
+                    Reproduction7Day = double.NaN;
+                else if(!double.TryParse(sp.Slice(i, j), NumberStyles.Float, CultureInfo.InvariantCulture, out Reproduction7Day))
                     Reproduction7Day = 0d;
             }
 
@@ -79,7 +64,7 @@ namespace LogicLink.Corona {
             /// Returns a string that represents the current object.
             /// </summary>
             /// <returns>A string that represents the current object.</returns>
-            public override string ToString() => $"{Date} {Reproduction:N2} {Reproduction7Day:N2}";
+            public override string ToString() => $"{Date} {Reproduction7Day:N2}";
         }
 
         /// <summary>
@@ -93,7 +78,7 @@ namespace LogicLink.Corona {
                     await rd.ReadLineAsync();
                     while(!rd.EndOfStream) {
                         Record r = new Record(await rd.ReadLineAsync());
-                        if(r.Date != DateTime.MinValue)
+                        if(r.Date != DateTime.MinValue && r.Reproduction7Day != double.NaN)
                             yield return r;
                 }
             }

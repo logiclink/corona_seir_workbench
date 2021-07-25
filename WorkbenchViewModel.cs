@@ -43,7 +43,6 @@ namespace LogicLink.Corona {
         private bool _bShow7DaysConfirmed;              // If true, 7 day average of daily confirmed cases per 100.000-series of the JHU-data is shown
         private bool _bShowRecovered;                   // If true, total recovered-series of the JHU-data is shown
         private bool _bShowDeaths;                      // If true, total death-series of the JHU-data is shown
-        private bool _bShowNowcasting;                  // If true, R₀-series of the RKI-data is shown for the second axis
         private bool _bShowNowcasting7Day;              // If true, 7 days average R₀-series of the RKI-data is shown for the second axis
         private bool _bShowDoubledMarker;               // If true, double value diamond markers are added to cases-, daily- and 7days-series of the SEIR-object
         private bool _bShowConfirmedVaccinated;         // If true, vaccinated-series of the OWID-data is shown
@@ -401,18 +400,6 @@ namespace LogicLink.Corona {
         }
 
         /// <summary>
-        /// Shows the RKI nowcasting R₀ value 
-        /// </summary>
-        public bool ShowNowcasting {
-            get { return _bShowNowcasting; }
-            set { if(_bShowNowcasting != value) {
-                    _bShowNowcasting = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        /// <summary>
         /// Shows the RKI nowcasting 7-Day-R₀ value
         /// </summary>
         public bool ShowNowcasting7Day {
@@ -547,7 +534,6 @@ namespace LogicLink.Corona {
             this.Show7DaysConfirmed =           bShow && (Settings.Default.Show >> 13 & 1) == 1;
             this.ShowRecovered =                bShow && (Settings.Default.Show >> 14 & 1) == 1;
             this.ShowDeaths =                   bShow && (Settings.Default.Show >> 15 & 1) == 1;
-            this.ShowNowcasting =               bShow && (Settings.Default.Show >> 16 & 1) == 1;
             this.ShowNowcasting7Day =           bShow && (Settings.Default.Show >> 17 & 1) == 1;
             this.ShowConfirmedVaccinated =      bShow && (Settings.Default.Show >> 18 & 1) == 1;
             this.ShowDailyConfirmedVaccinated = bShow && (Settings.Default.Show >> 19 & 1) == 1;
@@ -589,7 +575,6 @@ namespace LogicLink.Corona {
                                     (_bShow7DaysConfirmed ?           1 << 13 : 0) |
                                     (_bShowRecovered ?                1 << 14 : 0) |
                                     (_bShowDeaths ?                   1 << 15 : 0) |
-                                    (_bShowNowcasting ?               1 << 16 : 0) |
                                     (_bShowNowcasting7Day ?           1 << 17 : 0) |
                                     (_bShowConfirmedVaccinated ?      1 << 18 : 0) |
                                     (_bShowDailyConfirmedVaccinated ? 1 << 19 : 0);

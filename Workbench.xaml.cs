@@ -285,15 +285,14 @@ namespace LogicLink.Corona {
 
                 // 4. Get RKI nowcasting data and create series
                 RKINowcasting rnc = new RKINowcasting();
-                RKINowcastingDateSeriesView vRnc = new RKINowcastingDateSeriesView(rnc, vm.ShowNowcasting, vm.ShowNowcasting7Day);
-                if(vm.ShowNowcasting || vm.ShowNowcasting7Day) {
+                RKINowcastingDateSeriesView vRnc = new RKINowcastingDateSeriesView(rnc, vm.ShowNowcasting7Day);
+                if(vm.ShowNowcasting7Day) {
                     Progress pgrRnc = new Progress(65, 29);
                     pgrRnc.Changed += _pgr_Changed;
                     try {
                         await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
                     } catch(Exception ex) {
                         MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowNowcasting = false;
                         vm.ShowNowcasting7Day = false;
                     }
                     pgrRnc.Changed -= _pgr_Changed;
