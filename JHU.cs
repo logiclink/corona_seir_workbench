@@ -15,60 +15,25 @@ namespace LogicLink.Corona {
     /// </summary>
     public class JHU {
 
-        private static Dictionary<string, List<Record>> _dic;                   // Memory Cache
+        private static Dictionary<string, Dictionary<DateTime, Record>> _dic;   // Memory Cache
         private static readonly SemaphoreSlim _sms = new SemaphoreSlim(1, 1);   // Semaphore blocking multiple LoadAsync calls and GetDataAsync before LoadAsync finishes
 
-        // Remarks: https://datahub.io/core/covid-19 aggregates Johns Hopkins University Center for Systems Science and Engineering (CSSE) data
-        private const string JHU_URL = "https://datahub.io/core/covid-19/r/countries-aggregated.csv";
+        private const string JHU_CONFIRMED_URL = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
+        private const string JHU_RECOVERED_URL = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv";
+        private const string JHU_DEATHS_URL = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 
         /// <summary>
-        /// Structure for a record of a CSV file row
+        /// Structure for a record of a Day
         /// </summary>
         public struct Record {
 
-            /// <summary>
-            /// Factory method for parsing a row into a record.
-            /// </summary>
-            /// <param name="s">Row of the CSV file</param>
-            /// <param name="sCountryPrevious">Country of the previous row for decission if a new country starts.</param>
-            /// <param name="iConfirmedPrevious">Number of confirmed cases of the previous row.</param>
-            /// <returns>Tuple of country string and record</returns>
-            public static (string Country, Record Record) FromString(string s, string sCountryPrevious = default, int iConfirmedPrevious = 0) {
-                ReadOnlySpan<char> sp = s;
-                int i = 0;
+            #region Public readonly fields
 
-                int j = sp.QuotedIndexOf(',');
-                DateTime dtDate = DateTime.Parse(sp.Slice(i, j), CultureInfo.InvariantCulture);
-                i += j + 1;
-
-                j = sp[i..].QuotedIndexOf(',');
-                string sCountry = sp[i] == '"'
-                                  ? sp[i + j - 1] == '"'
-                                    ? new string(sp.Slice(i + 1, j - 2))
-                                    : new string(sp.Slice(i + 1, j - 1))
-                                  : new string(sp.Slice(i, j));
-                i += j + 1;
-
-                j = sp[i..].QuotedIndexOf(',');
-                int iConfirmed = int.Parse(sp.Slice(i, j));
-                i += j + 1;
-
-                j = sp[i..].QuotedIndexOf(',');
-                int iRecovered = int.Parse(sp.Slice(i, j));
-                i += j + 1;
-
-                int iDeaths = int.Parse(sp[i..]);
-
-                return (sCountry, new Record(dtDate, iConfirmed, sCountry == sCountryPrevious ? (iConfirmed - iConfirmedPrevious > 0 ? iConfirmed - iConfirmedPrevious : 0) : 0, iRecovered, iDeaths));
-            }
-
-            #region Public readonly properties
-
-            public readonly DateTime Date;          // Date of the record
-            public readonly int Confirmed;          // Total number of confirmed infected individuals
-            public readonly int DailyConfirmed;     // Number of confirmed infected individuals for the day
-            public readonly int Recovered;          // Total number of recovered individuals
-            public readonly int Deaths;             // Total number of deaths of infected individuals
+            public readonly DateTime Date;  // Date of the record
+            public readonly int Confirmed;           // Total number of confirmed infected individuals
+            public readonly int DailyConfirmed;      // Number of confirmed infected individuals for the day
+            public readonly int Recovered;           // Total number of recovered individuals
+            public readonly int Deaths;              // Total number of deaths of infected individuals
 
             #endregion
 
@@ -108,6 +73,67 @@ namespace LogicLink.Corona {
             public override string ToString() => $"{Date}\t{Confirmed}\t{Recovered}\t{Deaths}";
         }
 
+        private List<DateTime> GetDatesFromString(string s) {
+            ReadOnlySpan<char> sp = s;
+            List<DateTime> l = new List<DateTime>();
+            int i = 0;
+            int j = 0;
+
+            // Ignore first four columns with Province/State, Country/Region, Lat & Long
+            for(int h = 0; h < 4; h++) {
+                j = sp[i..].QuotedIndexOf(',');
+                i += j + 1;
+            }
+
+            // Parse all date columns until the last one
+            j = sp[i..].QuotedIndexOf(',');
+            while( j != -1) {
+                l.Add(DateTime.Parse(sp.Slice(i, j), CultureInfo.InvariantCulture));
+                i += j + 1;
+                j = sp[i..].QuotedIndexOf(',');
+            }
+
+            // Parse last date column
+            l.Add(DateTime.Parse(sp[i..], CultureInfo.InvariantCulture));
+
+            return l;
+        }
+
+        private (string Country, List<int> Values) GetValuesFromString(string s) {
+            ReadOnlySpan<char> sp = s;
+            List<int> l = new List<int>();
+            int i = 0;
+
+            // Ignore Province/State column
+            int j = sp[i..].QuotedIndexOf(',');
+            i += j + 1;
+
+            // Get Country/Region
+            j = sp[i..].QuotedIndexOf(',');
+            string sCountry = new string(sp.Slice(i, j));
+            i += j + 1;
+
+            // Ignore Lat & Long column
+            for(int h = 0; h < 2; h++) {
+                j = sp[i..].QuotedIndexOf(',');
+                i += j + 1;
+            }
+
+            // Parse all number columns until the last one
+            int k = 0;
+            j = sp[i..].QuotedIndexOf(',');
+            while(j != -1) {
+                l.Add(int.Parse(sp.Slice(i, j)));
+                i += j + 1;
+                j = sp[i..].QuotedIndexOf(',');
+            }
+
+            // Parse last number column
+            l.Add(int.Parse(sp[i..]));
+
+            return (sCountry, l);
+        }
+
         /// <summary>
         /// Loads the current Johns Hopkins University cornona data in a separate thread
         /// </summary>
@@ -117,27 +143,87 @@ namespace LogicLink.Corona {
                 _sms.Wait();
                 try {
                     if(_dic != null) return;
-                    Dictionary<string, List<Record>> dic = new Dictionary<string, List<Record>>();
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            await rd.ReadLineAsync();
-                            string s = default;
-                            Record r = default;
-                            while(!rd.EndOfStream) {
-                                (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Confirmed);
-                                if(dic.TryGetValue(s, out List<Record> l)) {
-                                    if((r.Date - l[^1].Date).TotalDays > 1 || (r.Confirmed == 0 && l[^1].Confirmed > 0))
-                                        Debug.WriteLine("ERROR IN DATA !!!");
-                                    l.Add(r);
-                                } else
-                                    dic[s] = new List<Record> { r };
+                    Dictionary<string, Dictionary<DateTime, Record>> dic = new Dictionary<string, Dictionary<DateTime, Record>>();
 
+                    // Confirmed data
+                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_CONFIRMED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using(StreamReader rd = new StreamReader(fs)) {
+                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                            string sCountry;
+                            List<int> lValues;
+                            while(!rd.EndOfStream) {
+                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                                if(lDates.Count != lValues.Count)
+                                    Debug.WriteLine("ERROR IN DATA !!!");
+
+                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
+                                    l = new Dictionary<DateTime, Record>();
+                                    dic[sCountry] = l;
+                                }
+                                
+                                for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
+                                    if(l.TryGetValue(lDates[i], out Record r)) {
+                                        l[lDates[i]] = new Record(lDates[i], r.Confirmed + lValues[i], i != 0 ? r.DailyConfirmed + lValues[i] - lValues[i - 1] : r.DailyConfirmed, r.Recovered, r.Deaths);
+                                    } else
+                                        l[lDates[i]] = new Record(lDates[i], lValues[i], i!= 0 ? lValues[i] - lValues[i - 1] : 0, 0, 0);
+                            }
                         }
-                    }
-                        _dic = dic;
-                    } finally {
-                        _sms.Release();
-                    }
+
+                    // Recovered data
+                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_RECOVERED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using(StreamReader rd = new StreamReader(fs)) {
+                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                            string sCountry;
+                            List<int> lValues;
+                            while(!rd.EndOfStream) {
+                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                                if(lDates.Count != lValues.Count)
+                                    Debug.WriteLine("ERROR IN DATA !!!");
+
+                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
+                                    l = new Dictionary<DateTime, Record>();
+                                    dic[sCountry] = l;
+                                }
+
+                            for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
+                                if(l.TryGetValue(lDates[i], out Record r)) {
+                                    l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed , r.Recovered + lValues[i], r.Deaths);
+                                } else
+                                    l[lDates[i]] = new Record(lDates[i], 0, 0, lValues[i], 0);
+                            }
+                        }
+
+                    // Deaths data
+                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_DEATHS_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using(StreamReader rd = new StreamReader(fs)) {
+                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                            string sCountry;
+                            List<int> lValues;
+                            while(!rd.EndOfStream) {
+                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                                if(lDates.Count != lValues.Count)
+                                    Debug.WriteLine("ERROR IN DATA !!!");
+
+                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
+                                    l = new Dictionary<DateTime, Record>();
+                                    dic[sCountry] = l;
+                                }
+                                
+                                for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
+                                    if(l.TryGetValue(lDates[i], out Record r))
+                                        l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed , r.Recovered, r.Deaths + lValues[i]);
+                                    else
+                                        l[lDates[i]] = new Record(lDates[i], 0, 0, 0, lValues[i]);
+                            }
+                        }
+
+                    _dic = dic;
+                } finally {
+                    _sms.Release();
+                }
             });
         }
 
@@ -153,7 +239,7 @@ namespace LogicLink.Corona {
             if(!_dic.ContainsKey(sCountry))
                 yield break;
 
-            foreach(Record r in _dic[sCountry])
+            foreach(Record r in _dic[sCountry].Values)
                 yield return r;
         }
     }
