@@ -12,7 +12,7 @@ namespace LogicLink.Corona {
     /// Charting series view of a SEIRV object and R₀-values. X-axis is a time range.
     /// </summary>
     public class SEIRVR0DateSeriesView : SEIRR0DateSeriesView {
-        protected readonly Dictionary<DateTime, double> _dicVaccinated; // Dictionary of basic reproduction numbers (R₀). For missing dates the initial R₀ of the SEIR object is used.
+        protected readonly Dictionary<DateTime, double> _dicVaccinated; // Dictionary of vaccinations
 
         private readonly Series _serVaccinated;                         // Series of the number of individuals in the V(accinated) compartment
         private readonly Series _serDailyVaccinated;                    // Series of the number of vaccinated individuals for the day ( Vaccinated - Vaccinated of the previous day )
@@ -75,7 +75,7 @@ namespace LogicLink.Corona {
                 _seir.Calc(iDays);
 
                 if(_serSusceptible != null)
-                    _serSusceptible.Points.AddXY(dt, _seir.Susceptible - ((ISEIRV)_seir).Vaccinated);
+                    _serSusceptible.Points.AddXY(dt, _seir.Susceptible - ((ISEIRV)_seir).Vaccinated * ((ISEIRV)_seir).Effectiveness);
                 if(_serExposed != null)
                     _serExposed.Points.AddXY(dt, _seir.Exposed);
                 if(_serInfectious != null)

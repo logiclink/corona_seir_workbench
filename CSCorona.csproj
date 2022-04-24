@@ -8,13 +8,13 @@
     <AssemblyName>Corona</AssemblyName>
     <RootNamespace>LogicLink.Corona</RootNamespace>
     <ApplicationIcon>Corona.ico</ApplicationIcon>
-    <Version>2.3.1</Version>
-    <AssemblyVersion>2.3.1.0725</AssemblyVersion>
-    <FileVersion>2.3.1.0725</FileVersion>
+    <Version>2.4.0</Version>
+    <AssemblyVersion>2.4.0.2404</AssemblyVersion>
+    <FileVersion>2.4.0.2404</FileVersion>
     <PackageId>LogicLink.Corona</PackageId>
     <Authors>LogicLink, Marcus Müller</Authors>
     <Product>Corona SEIR Workbench</Product>
-    <Copyright>2020-2021 by LogicLink, Marcus Müller</Copyright>
+    <Copyright>2020-2022 by LogicLink, Marcus Müller</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://www.logiclink.de/2020/11/20/corona-seir-workbench/</PackageProjectUrl>
   </PropertyGroup>

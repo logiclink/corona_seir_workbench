@@ -237,7 +237,7 @@ namespace LogicLink.Corona {
                 IDateSeriesView vSeir = _dicReproduction == null
                                         ? _dicVaccinated == null 
                                           ? new SEIRDateSeriesView(seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
-                                          : new SEIRVDateSeriesView((ISEIRV)seir, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker, vm.ShowVaccinated, vm.ShowDailyVaccinated)
+                                          : new SEIRVDateSeriesView((ISEIRV)seir, _dicVaccinated, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker, vm.ShowVaccinated, vm.ShowDailyVaccinated)
                                         : _dicVaccinated == null 
                                           ? new SEIRR0DateSeriesView(seir, _dicReproduction, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker)
                                           : new SEIRVR0DateSeriesView((ISEIRV)seir, _dicReproduction, _dicVaccinated, vm.ShowSusceptible, vm.ShowExposed, vm.ShowInfectious, vm.ShowRemoved, vm.ShowCases, vm.ShowDaily, vm.Show7Days, vm.ShowReproduction, vm.ShowDoubledMarker, vm.ShowVaccinated, vm.ShowDailyVaccinated);
