@@ -431,8 +431,8 @@ namespace LogicLink.Corona {
                 pbr.Visibility = Visibility.Visible;
             else if(!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
                 pbr.Visibility = Visibility.Collapsed;
-
-            pbr.Dispatcher.Invoke(delegate () { }, DispatcherPriority.Background);
+            
+            pbr.Dispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
         }
 
         private void btnData_Click(object sender, RoutedEventArgs e) => new Data(cht.ToDataTable()).ShowDialog();
