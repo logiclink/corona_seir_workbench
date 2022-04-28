@@ -78,7 +78,7 @@ namespace LogicLink.Corona {
                     await rd.ReadLineAsync();
                     while(!rd.EndOfStream) {
                         Record r = new Record(await rd.ReadLineAsync());
-                        if(r.Date != DateTime.MinValue && r.Reproduction7Day != double.NaN)
+                        if(r.Date != DateTime.MinValue && !double.IsNaN(r.Reproduction7Day))
                             yield return r;
                 }
             }
