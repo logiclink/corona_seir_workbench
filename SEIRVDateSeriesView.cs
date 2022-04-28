@@ -142,9 +142,9 @@ namespace LogicLink.Corona {
         /// </summary>
         /// <returns>Enumerable of charting series</returns>
         public override IEnumerator<Series> GetEnumerator() {
-            IEnumerator<Series> e = base.GetEnumerator();
-            while(e.MoveNext())
-                yield return e.Current;
+            using(IEnumerator<Series> e = base.GetEnumerator())
+                while(e.MoveNext())
+                    yield return e.Current;
 
             if(_serVaccinated != null)
                 yield return _serVaccinated;
