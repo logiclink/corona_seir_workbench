@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -45,6 +46,7 @@ namespace LogicLink.Corona {
         private Dictionary<DateTime, double> _dicVaccinated;                // Dictionary of vaccinates individuals per day
 
         private bool _bUpdating = false;
+        private readonly SynchronizationContext _uiContext;
 
         private async Task UpdateReproductionAsync(WorkbenchViewModel vm) {
             _bUpdateReproduction = false;
@@ -221,7 +223,6 @@ namespace LogicLink.Corona {
             cht.ChartAreas[0].AxisY2.MinorTickMark.Enabled = true;
             cht.ChartAreas[0].AxisY2.MinorTickMark.Interval = .1d;
             cht.ChartAreas[0].AxisY2.MinorTickMark.LineColor = Color.LightGray;
-
         }
 
         private async Task UpdateChartAsync(WorkbenchViewModel vm) {
@@ -297,37 +298,44 @@ namespace LogicLink.Corona {
                     pgrRnc.Changed -= _pgr_Changed;
                 }
 
-                // 5. Update Title
-                cht.Titles[0].Text = vm.Country;
+                _uiContext.Send(_ =>
+                {
+                    // 5. Update Title
+                    cht.Titles[0].Text = vm.Country;
 
-                // 6. Add strip lines for weekend
-                cht.ChartAreas[0].AxisX.StripLines.Clear();
-                cht.ChartAreas[0].AxisX.StripLines.Add(new StripLine { IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
-                                                                       Interval = 7,
-                                                                       StripWidth = 2,
-                                                                       BackColor = Color.FromArgb(247, 247, 247) });
+                    // 6. Add strip lines for weekend
+                    cht.ChartAreas[0].AxisX.StripLines.Clear();
+                    cht.ChartAreas[0].AxisX.StripLines.Add(
+                        new StripLine 
+                        { 
+                            IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
+                            Interval = 7,
+                            StripWidth = 2,
+                            BackColor = Color.FromArgb(247, 247, 247)
+                        });
 
-                // 7. Show available series
-                cht.Series.Clear();
-                _pgr.Report(95);
-                cht.Series.Add(vSeir);
-                _pgr.Report(96);
-                cht.Series.Add(vJhu);
-                _pgr.Report(97);
-                cht.Series.Add(vOwid);
-                _pgr.Report(98);
-                cht.Series.Add(vRnc);
-                _pgr.Report(99);
+                    // 7. Show available series
+                    cht.Series.Clear();
+                    _pgr.Report(95);
+                    cht.Series.Add(vSeir);
+                    _pgr.Report(96);
+                    cht.Series.Add(vJhu);
+                    _pgr.Report(97);
+                    cht.Series.Add(vOwid);
+                    _pgr.Report(98);
+                    cht.Series.Add(vRnc);
+                    _pgr.Report(99);
 
-                cht.ChartAreas[0].RecalculateAxesScale();
+                    cht.ChartAreas[0].RecalculateAxesScale();
 
-                _pgr.Report(100);
+                    _pgr.Report(100);
 
-                // 8. Add Legend
-                cht.Legends.Clear();
-                cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
-            
-                _pgr.Report(100, "Ready", false);
+                    // 8. Add Legend
+                    cht.Legends.Clear();
+                    cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
+                
+                    _pgr.Report(100, "Ready", false);
+                }, null);
             } catch(Exception ex) {
                 MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
@@ -373,6 +381,8 @@ namespace LogicLink.Corona {
 
         public Workbench() {
             InitializeComponent();
+            _uiContext = SynchronizationContext.Current;
+            
             this.Title = $"{this.Title} {Assembly.GetExecutingAssembly().GetName().Version}";
 
             _pgr.Changed += _pgr_Changed;
@@ -393,10 +403,8 @@ namespace LogicLink.Corona {
                 return;
             }
 
-            // Initialize view model
-#pragma warning disable CS4014
-            InitializeAsync(vm);
-#pragma warning restore CS4014
+            InitChart();
+            Task.Run(async () => { await InitializeAsync(vm); });
         }
 
         private async Task InitializeAsync(WorkbenchViewModel viewModel)
@@ -422,16 +430,10 @@ namespace LogicLink.Corona {
                 MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
-
-            InitChart();
-
+            
             try
             {
-                if (viewModel.SolveR0 || viewModel.SolveR0Interval)
-                {
-                    await UpdateReproductionAsync(viewModel);
-                }
-
+                await UpdateReproductionAsync(viewModel);
                 await UpdateVaccinationAsync(viewModel);
                 await UpdateChartAsync(viewModel);
             }
@@ -448,18 +450,22 @@ namespace LogicLink.Corona {
 
         #region Control Events
 
-        private void _pgr_Changed(object sender, ValueEventArgs<(int Progress, string Message, bool Show)> e) {
-            pbr.Value = e.Value.Progress;
+        private void _pgr_Changed(object sender, ValueEventArgs<(int Progress, string Message, bool Show)> e) 
+        {
+            _uiContext.Send(_ =>
+            {
+                pbr.Value = e.Value.Progress;
 
-            if(e.Value.Message != default)
-                sbi.Content = e.Value.Message;
+                if (e.Value.Message != default)
+                    sbi.Content = e.Value.Message;
 
-            if(e.Value.Show && pbr.Visibility != Visibility.Visible)
-                pbr.Visibility = Visibility.Visible;
-            else if(!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
-                pbr.Visibility = Visibility.Collapsed;
-            
-            pbr.Dispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+                if (e.Value.Show && pbr.Visibility != Visibility.Visible)
+                    pbr.Visibility = Visibility.Visible;
+                else if (!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
+                    pbr.Visibility = Visibility.Collapsed;
+
+                pbr.Dispatcher.Invoke(delegate() { }, DispatcherPriority.Render);
+            }, null);
         }
 
         private void btnData_Click(object sender, RoutedEventArgs e) => new Data(cht.ToDataTable()).ShowDialog();
@@ -640,24 +646,22 @@ namespace LogicLink.Corona {
 
         private void _tmr_Elapsed(object sender, EventArgs e) 
         {
-            if (!_bUpdating) 
-            {
-                _bUpdating = true;
-                _tmr.Stop();
-
-#pragma warning disable CS4014
-                UpdateAsync();
-#pragma warning restore CS4014
-            }
-        }
-
-        private async Task UpdateAsync()
-        {
             if (DataContext is not WorkbenchViewModel viewModel)
             {
                 return;
             }
 
+            if (!_bUpdating) 
+            {
+                _bUpdating = true;
+                _tmr.Stop();
+
+                Task.Run(async () => { await UpdateAsync(viewModel); });
+            }
+        }
+
+        private async Task UpdateAsync(WorkbenchViewModel viewModel)
+        {
             if (_bUpdateReproduction)
             {
                 await UpdateReproductionAsync(viewModel);
@@ -677,30 +681,22 @@ namespace LogicLink.Corona {
 
         #region ViewModel Events
 
-        private void vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            if(!(sender is WorkbenchViewModel vm)) return;
+        private void vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) 
+        {
+            if (sender is not WorkbenchViewModel vm)
+            {
+                return;
+            }
 
             switch(e.PropertyName) {
                 case nameof(WorkbenchViewModel.Country):
                     _bUpdating = true;
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdatePopulationAsync(vm); 
-                                                                                                 await UpdateInfectiousAsync(vm);
-                                                                                                 _bUpdating = false;
-                                                                                                 _bUpdateReproduction = true;
-                                                                                                 _bUpdateDailyVaccination = true;
-                                                                                                 _bUpdateVaccination = true;
-                                                                                                 _bManualVaccination = false;
-                                                                                                 _tmr.Start();
-                                                                                               }));
+                    Task.Run(() => { HandleCountryChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.Start):
                     _bUpdating = true;
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdateInfectiousAsync(vm);
-                                                                                                 _bUpdating = false;
-                                                                                                 _bUpdateReproduction = true;
-                                                                                                 _tmr.Start();
-                                                                                               }));
+                    Task.Run(() => { HandleStartDateChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.End):
@@ -745,6 +741,28 @@ namespace LogicLink.Corona {
                     _tmr.Start();
                     break;
             }
+        }
+
+        private async Task HandleStartDateChangeAsync(WorkbenchViewModel vm)
+        {
+            await UpdateInfectiousAsync(vm);
+            _bUpdating = false;
+            _bUpdateReproduction = true;
+
+            _tmr.Start();
+        }
+
+        private async Task HandleCountryChangeAsync(WorkbenchViewModel vm)
+        {
+            await UpdatePopulationAsync(vm);
+            await UpdateInfectiousAsync(vm);
+            _bUpdating = false;
+            _bUpdateReproduction = true;
+            _bUpdateDailyVaccination = true;
+            _bUpdateVaccination = true;
+            _bManualVaccination = false;
+
+            _tmr.Start();
         }
 
         #endregion
