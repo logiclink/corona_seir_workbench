@@ -152,33 +152,47 @@ namespace LogicLink.Corona {
         /// Loads the current Our World in Data vaccination data in a separate thread
         /// </summary>
         /// <returns>awaitable Task</returns>
-        public async Task LoadAsync() {
-            await Task.Run(async () => {
-                _sms.Wait();
-                try {
-                    if(_dic != null) return;
-                    Dictionary<string, List<Record>> dic = new Dictionary<string, List<Record>>();
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(OWID_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            await rd.ReadLineAsync();
-                            string s = default;
-                            Record r = default;
-                            while(!rd.EndOfStream) {
-                                (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Vaccinated);
-                                if(dic.TryGetValue(s, out List<Record> l)) {
-                                    Record rLast = l[^1];
-                                    for(DateTime dt = rLast.Date.AddDays(1); dt < r.Date; dt = dt.AddDays(1))
-                                        l.Add(new Record(dt, rLast.Vaccinated));
-                                    l.Add(r);
-                                } else
-                                    dic[s] = new List<Record> { r };
-                            }
-                        }
-                        _dic = dic;
-                } finally {
-                    _sms.Release();
+        public async Task LoadAsync()
+        {
+            if (_dic != null)
+            {
+                return;
+            }
+
+            await _sms.WaitAsync();
+            try
+            {
+                _dic ??= await LoadInternalAsync();
+            }
+            finally
+            {
+                _sms.Release();
+            }
+        }
+
+        private async Task<Dictionary<string, List<Record>>> LoadInternalAsync()
+        {
+            Dictionary<string, List<Record>> dic = new Dictionary<string, List<Record>>();
+
+            await using(FileStream fs = new FileStream(await Download.GetCachedAsync(OWID_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using(StreamReader rd = new StreamReader(fs)) 
+            {
+                await rd.ReadLineAsync();
+                string s = default;
+                Record r = default;
+                while(!rd.EndOfStream) {
+                    (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Vaccinated);
+                    if(dic.TryGetValue(s, out List<Record> l)) {
+                        Record rLast = l[^1];
+                        for(DateTime dt = rLast.Date.AddDays(1); dt < r.Date; dt = dt.AddDays(1))
+                            l.Add(new Record(dt, rLast.Vaccinated));
+                        l.Add(r);
+                    } else
+                        dic[s] = new List<Record> { r };
                 }
-            });
+            }
+
+            return dic;
         }
 
         /// <summary>

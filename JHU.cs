@@ -138,93 +138,131 @@ namespace LogicLink.Corona {
         /// Loads the current Johns Hopkins University cornona data in a separate thread
         /// </summary>
         /// <returns>awaitable Task</returns>
-        public async Task LoadAsync() {
-            await Task.Run(async () => {
-                _sms.Wait();
-                try {
-                    if(_dic != null) return;
-                    Dictionary<string, Dictionary<DateTime, Record>> dic = new Dictionary<string, Dictionary<DateTime, Record>>();
+        public async Task LoadAsync() 
+        {
+            if (_dic != null)
+            {
+                return;
+            }
 
-                    // Confirmed data
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_CONFIRMED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
-                            string sCountry;
-                            List<int> lValues;
-                            while(!rd.EndOfStream) {
-                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+            await _sms.WaitAsync();
+            try
+            {
+                _dic ??= await LoadInternalAsync();
+            } 
+            finally 
+            {
+                _sms.Release();
+            }
+        }
 
-                                if(lDates.Count != lValues.Count)
-                                    Debug.WriteLine("ERROR IN DATA !!!");
+        private async Task<Dictionary<string, Dictionary<DateTime, Record>>> LoadInternalAsync()
+        {
+            Dictionary<string, Dictionary<DateTime, Record>> dic = new Dictionary<string, Dictionary<DateTime, Record>>();
 
-                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
-                                    l = new Dictionary<DateTime, Record>();
-                                    dic[sCountry] = l;
-                                }
-                                
-                                for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
-                                    if(l.TryGetValue(lDates[i], out Record r)) {
-                                        l[lDates[i]] = new Record(lDates[i], r.Confirmed + lValues[i], i != 0 ? r.DailyConfirmed + lValues[i] - lValues[i - 1] : r.DailyConfirmed, r.Recovered, r.Deaths);
-                                    } else
-                                        l[lDates[i]] = new Record(lDates[i], lValues[i], i!= 0 ? lValues[i] - lValues[i - 1] : 0, 0, 0);
-                            }
+            // Confirmed data
+            await using (FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_CONFIRMED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader rd = new StreamReader(fs))
+            {
+                List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                string sCountry;
+                List<int> lValues;
+                while (!rd.EndOfStream)
+                {
+                    (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                    if (lDates.Count != lValues.Count)
+                        Debug.WriteLine("ERROR IN DATA !!!");
+
+                    if (!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l))
+                    {
+                        l = new Dictionary<DateTime, Record>();
+                        dic[sCountry] = l;
+                    }
+
+                    for (int i = 0; i < (int) Math.Min(lDates.Count, lValues.Count); i++)
+                    {
+                        if (l.TryGetValue(lDates[i], out Record r))
+                        {
+                            l[lDates[i]] = new Record(lDates[i], r.Confirmed + lValues[i],
+                                i != 0 ? r.DailyConfirmed + lValues[i] - lValues[i - 1] : r.DailyConfirmed, r.Recovered,
+                                r.Deaths);
                         }
-
-                    // Recovered data
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_RECOVERED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
-                            string sCountry;
-                            List<int> lValues;
-                            while(!rd.EndOfStream) {
-                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
-
-                                if(lDates.Count != lValues.Count)
-                                    Debug.WriteLine("ERROR IN DATA !!!");
-
-                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
-                                    l = new Dictionary<DateTime, Record>();
-                                    dic[sCountry] = l;
-                                }
-
-                            for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
-                                if(l.TryGetValue(lDates[i], out Record r)) {
-                                    l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed , r.Recovered + lValues[i], r.Deaths);
-                                } else
-                                    l[lDates[i]] = new Record(lDates[i], 0, 0, lValues[i], 0);
-                            }
+                        else
+                        {
+                            l[lDates[i]] = new Record(lDates[i], lValues[i], i != 0 ? lValues[i] - lValues[i - 1] : 0, 0, 0);
                         }
-
-                    // Deaths data
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_DEATHS_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
-                            string sCountry;
-                            List<int> lValues;
-                            while(!rd.EndOfStream) {
-                                (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
-
-                                if(lDates.Count != lValues.Count)
-                                    Debug.WriteLine("ERROR IN DATA !!!");
-
-                                if(!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l)) {
-                                    l = new Dictionary<DateTime, Record>();
-                                    dic[sCountry] = l;
-                                }
-                                
-                                for(int i = 0; i < (int)Math.Min(lDates.Count, lValues.Count); i++)
-                                    if(l.TryGetValue(lDates[i], out Record r))
-                                        l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed , r.Recovered, r.Deaths + lValues[i]);
-                                    else
-                                        l[lDates[i]] = new Record(lDates[i], 0, 0, 0, lValues[i]);
-                            }
-                        }
-
-                    _dic = dic;
-                } finally {
-                    _sms.Release();
+                    }
                 }
-            });
+            }
+
+            // Recovered data
+            await using (FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_RECOVERED_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader rd = new StreamReader(fs))
+            {
+                List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                string sCountry;
+                List<int> lValues;
+                while (!rd.EndOfStream)
+                {
+                    (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                    if (lDates.Count != lValues.Count)
+                        Debug.WriteLine("ERROR IN DATA !!!");
+
+                    if (!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l))
+                    {
+                        l = new Dictionary<DateTime, Record>();
+                        dic[sCountry] = l;
+                    }
+
+                    for (int i = 0; i < (int) Math.Min(lDates.Count, lValues.Count); i++)
+                    {
+                        if (l.TryGetValue(lDates[i], out Record r))
+                        {
+                            l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed,
+                                r.Recovered + lValues[i], r.Deaths);
+                        }
+                        else
+                        {
+                            l[lDates[i]] = new Record(lDates[i], 0, 0, lValues[i], 0);
+                        }
+                    }
+                }
+            }
+
+            // Deaths data
+            await using (FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_DEATHS_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader rd = new StreamReader(fs))
+            {
+                List<DateTime> lDates = GetDatesFromString(await rd.ReadLineAsync());
+                string sCountry;
+                List<int> lValues;
+                while (!rd.EndOfStream)
+                {
+                    (sCountry, lValues) = GetValuesFromString(await rd.ReadLineAsync());
+
+                    if (lDates.Count != lValues.Count)
+                        Debug.WriteLine("ERROR IN DATA !!!");
+
+                    if (!dic.TryGetValue(sCountry, out Dictionary<DateTime, Record> l))
+                    {
+                        l = new Dictionary<DateTime, Record>();
+                        dic[sCountry] = l;
+                    }
+
+                    for (int i = 0; i < (int) Math.Min(lDates.Count, lValues.Count); i++)
+                    {
+                        if (l.TryGetValue(lDates[i], out Record r))
+                            l[lDates[i]] = new Record(lDates[i], r.Confirmed, r.DailyConfirmed, r.Recovered,
+                                r.Deaths + lValues[i]);
+                        else
+                            l[lDates[i]] = new Record(lDates[i], 0, 0, 0, lValues[i]);
+                    }
+                }
+            }
+
+            return dic;
         }
 
         /// <summary>

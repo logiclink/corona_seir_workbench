@@ -112,33 +112,45 @@ namespace LogicLink.Corona {
         /// Loads the current Johns Hopkins University cornona data in a separate thread
         /// </summary>
         /// <returns>awaitable Task</returns>
-        public async Task LoadAsync() {
-            await Task.Run(async () => {
-                _sms.Wait();
-                try {
-                    if(_dic != null) return;
-                    Dictionary<string, List<Record>> dic = new Dictionary<string, List<Record>>();
-                    using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using(StreamReader rd = new StreamReader(fs)) {
-                            await rd.ReadLineAsync();
-                            string s = default;
-                            Record r = default;
-                            while(!rd.EndOfStream) {
-                                (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Confirmed);
-                                if(dic.TryGetValue(s, out List<Record> l)) {
-                                    if((r.Date - l[^1].Date).TotalDays > 1 || (r.Confirmed == 0 && l[^1].Confirmed > 0))
-                                        Debug.WriteLine("ERROR IN DATA !!!");
-                                    l.Add(r);
-                                } else
-                                    dic[s] = new List<Record> { r };
+        public async Task LoadAsync()
+        {
+            if (_dic != null)
+            {
+                return;
+            }
 
-                        }
-                    }
-                        _dic = dic;
-                    } finally {
-                        _sms.Release();
-                    }
-            });
+            await _sms.WaitAsync();
+            try
+            {
+                _dic ??= await LoadInternalAsync();
+            }
+            finally
+            {
+                _sms.Release();
+            }
+        }
+
+        private async Task<Dictionary<string, List<Record>>> LoadInternalAsync()
+        {
+            Dictionary<string, List<Record>> dic = new Dictionary<string, List<Record>>();
+
+            await using(FileStream fs = new FileStream(await Download.GetCachedAsync(JHU_URL), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using(StreamReader rd = new StreamReader(fs)) {
+                await rd.ReadLineAsync();
+                string s = default;
+                Record r = default;
+                while(!rd.EndOfStream) {
+                    (s, r) = Record.FromString(await rd.ReadLineAsync(), s, r.Confirmed);
+                    if(dic.TryGetValue(s, out List<Record> l)) {
+                        if((r.Date - l[^1].Date).TotalDays > 1 || (r.Confirmed == 0 && l[^1].Confirmed > 0))
+                            Debug.WriteLine("ERROR IN DATA !!!");
+                        l.Add(r);
+                    } else
+                        dic[s] = new List<Record> { r };
+                }
+            }
+
+            return dic;
         }
 
         /// <summary>
