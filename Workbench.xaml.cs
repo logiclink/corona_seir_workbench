@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -36,7 +35,7 @@ namespace LogicLink.Corona {
         */
 
         private Progress _pgr = new Progress();
-        private System.Timers.Timer _tmr = new System.Timers.Timer(250);
+        private DispatcherTimer _tmr = new();
         private bool _bUpdateReproduction = false;                          // True, if basic reproduction numbers (R₀) should be re-calculated
         private bool _bUpdateVaccination = false;                           // True, if vaccinations should be re-calculated
         private bool _bUpdateDailyVaccination = true;                       // True, if the number of daily vaccinated people should be re-calculated from the last 7 days
@@ -377,7 +376,8 @@ namespace LogicLink.Corona {
             this.Title = $"{this.Title} {Assembly.GetExecutingAssembly().GetName().Version}";
 
             _pgr.Changed += _pgr_Changed;
-            _tmr.Elapsed += _tmr_Elapsed;
+            _tmr.Interval = TimeSpan.FromMilliseconds(250);
+            _tmr.Tick += _tmr_Elapsed;
             cht.PostPaint += cht_PostPaint;
             cht.GetToolTipText += cht_GetToolTipText;
         }
@@ -386,35 +386,62 @@ namespace LogicLink.Corona {
 
         #region Window Events
 
-        private void Workbench_Loaded(object sender, RoutedEventArgs e) {
-            if(!(this.DataContext is WorkbenchViewModel vm)) return;
+        private void Workbench_Loaded(object sender, RoutedEventArgs e) 
+        {
+            if (this.DataContext is not WorkbenchViewModel vm)
+            {
+                return;
+            }
 
             // Initialize view model
-            vm.Load();                                  // Load Settings
-            vm.PropertyChanged += vm_PropertyChanged;
+#pragma warning disable CS4014
+            InitializeAsync(vm);
+#pragma warning restore CS4014
+        }
+
+        private async Task InitializeAsync(WorkbenchViewModel viewModel)
+        {
+            viewModel.Load(); // Load Settings
 
             // Initialize Johns Hopkins University data
-            Dispatcher.BeginInvoke((Action)(async () => {
-                try {
-                    await new JHU().LoadAsync();
-                } catch(Exception ex) {
-                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
-                try {
-                    await new OWID().LoadAsync();
-                } catch(Exception ex) {
-                    MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
-        }), DispatcherPriority.Background);
+            try
+            {
+                await new JHU().LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+            try
+            {
+                await new OWID().LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
 
             InitChart();
-            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(vm.SolveR0 || vm.SolveR0Interval)
-                                                                                            await UpdateReproductionAsync(vm);
-                                                                                         await UpdateVaccinationAsync(vm);
-                                                                                         await UpdateChartAsync(vm); 
-                                                                                        }));
+
+            try
+            {
+                if (viewModel.SolveR0 || viewModel.SolveR0Interval)
+                {
+                    await UpdateReproductionAsync(viewModel);
+                }
+
+                await UpdateVaccinationAsync(viewModel);
+                await UpdateChartAsync(viewModel);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+
+            viewModel.PropertyChanged += vm_PropertyChanged;
         }
 
         #endregion
@@ -610,19 +637,40 @@ namespace LogicLink.Corona {
         #endregion
 
         #region Timer Events
-        
-        private void _tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-            if(!_bUpdating) {
+
+        private void _tmr_Elapsed(object sender, EventArgs e) 
+        {
+            if (!_bUpdating) 
+            {
                 _bUpdating = true;
                 _tmr.Stop();
-                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(_bUpdateReproduction)
-                                                                                                await UpdateReproductionAsync(this.DataContext as WorkbenchViewModel);
-                                                                                             if(_bUpdateVaccination)
-                                                                                                await UpdateVaccinationAsync(this.DataContext as WorkbenchViewModel);
-                                                                                             await UpdateChartAsync(this.DataContext as WorkbenchViewModel); 
-                                                                                             _bUpdating = false;
-                                                                                           }));
+
+#pragma warning disable CS4014
+                UpdateAsync();
+#pragma warning restore CS4014
             }
+        }
+
+        private async Task UpdateAsync()
+        {
+            if (DataContext is not WorkbenchViewModel viewModel)
+            {
+                return;
+            }
+
+            if (_bUpdateReproduction)
+            {
+                await UpdateReproductionAsync(viewModel);
+            }
+
+            if (_bUpdateVaccination)
+            {
+                await UpdateVaccinationAsync(viewModel);
+            }
+
+            await UpdateChartAsync(viewModel);
+
+            _bUpdating = false;
         }
 
         #endregion
