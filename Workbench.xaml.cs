@@ -35,8 +35,8 @@ namespace LogicLink.Corona {
         private readonly DateTime REPRODUCTION_START = new DateTime(2020, 3, 6); 
         */
 
-        private Progress _pgr = new Progress();
-        private DispatcherTimer _tmr = new();
+        private readonly Progress _pgr = new Progress();
+        private readonly DispatcherTimer _tmr = new();
         private bool _bUpdateReproduction = false;                          // True, if basic reproduction numbers (R₀) should be re-calculated
         private bool _bUpdateVaccination = false;                           // True, if vaccinations should be re-calculated
         private bool _bUpdateDailyVaccination = true;                       // True, if the number of daily vaccinated people should be re-calculated from the last 7 days
@@ -133,8 +133,11 @@ namespace LogicLink.Corona {
                     _pgr.Report(100);
 
                 } catch(Exception ex) {
-                    MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
+                    _uiContext.Send(_ =>
+                    {
+                        MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        Close();
+                    }, null);
                 }
             } else
                 _dicReproduction = null;
@@ -183,8 +186,11 @@ namespace LogicLink.Corona {
                 }
                 _pgr.Report(100);
             } catch(Exception ex) {
-                MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
 
             if(bResetUpdating)
@@ -257,12 +263,15 @@ namespace LogicLink.Corona {
                     try {
                         await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the JHU data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowConfirmed = false;
-                        vm.ShowDailyConfirmed = false;
-                        vm.Show7DaysConfirmed = false;
-                        vm.ShowRecovered = false;
-                        vm.ShowDeaths = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the JHU data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowConfirmed = false;
+                            vm.ShowDailyConfirmed = false;
+                            vm.Show7DaysConfirmed = false;
+                            vm.ShowRecovered = false;
+                            vm.ShowDeaths = false;
+                        }, null);
                     }
                     pgrJhu.Changed -= _pgr_Changed;
                 }
@@ -276,9 +285,12 @@ namespace LogicLink.Corona {
                     try {
                         await vOwid.CalcAsync(vm.Start, vm.End, pgrOwd);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the OWID data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowConfirmedVaccinated = false;
-                        vm.ShowDailyConfirmedVaccinated = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the OWID data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowConfirmedVaccinated = false;
+                            vm.ShowDailyConfirmedVaccinated = false;
+                        }, null);
                     }
                     pgrOwd.Changed -= _pgr_Changed;
                 }
@@ -292,8 +304,11 @@ namespace LogicLink.Corona {
                     try {
                         await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowNowcasting7Day = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowNowcasting7Day = false;
+                        }, null);
                     }
                     pgrRnc.Changed -= _pgr_Changed;
                 }
@@ -337,8 +352,11 @@ namespace LogicLink.Corona {
                     _pgr.Report(100, "Ready", false);
                 }, null);
             } catch(Exception ex) {
-                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
 
             if(bResetUpdating)
@@ -357,8 +375,11 @@ namespace LogicLink.Corona {
             try {
                 vm.Population = await new WPPopulation().GetDataAsync(vm.Country, vm.Start.Year);
             } catch(Exception ex) {
-                MessageBox.Show($"World Bank population data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"World Bank population data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
         }
 
@@ -418,8 +439,11 @@ namespace LogicLink.Corona {
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
             try
             {
@@ -427,8 +451,11 @@ namespace LogicLink.Corona {
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
             
             try
@@ -439,8 +466,11 @@ namespace LogicLink.Corona {
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
 
             viewModel.PropertyChanged += vm_PropertyChanged;
@@ -463,8 +493,6 @@ namespace LogicLink.Corona {
                     pbr.Visibility = Visibility.Visible;
                 else if (!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
                     pbr.Visibility = Visibility.Collapsed;
-
-                pbr.Dispatcher.Invoke(delegate() { }, DispatcherPriority.Render);
             }, null);
         }
 
@@ -691,12 +719,12 @@ namespace LogicLink.Corona {
             switch(e.PropertyName) {
                 case nameof(WorkbenchViewModel.Country):
                     _bUpdating = true;
-                    Task.Run(() => { HandleCountryChangeAsync(vm); });
+                    Task.Run(async () => { await HandleCountryChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.Start):
                     _bUpdating = true;
-                    Task.Run(() => { HandleStartDateChangeAsync(vm); });
+                    Task.Run(async () => { await HandleStartDateChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.End):
