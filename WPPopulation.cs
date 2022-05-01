@@ -53,6 +53,9 @@ namespace LogicLink.Corona {
                 case "MSZ":                         // https://www.seereisedienst.de/kreuzfahrtschiffe/ms-zaandam/
                     iPopulation = 1432 + 615;
                     break;
+                case "VAT":
+                    iPopulation = 805;              // https://www.worldometers.info/world-population/holy-see-population/
+                    break;
                 default:
                     using(HttpClient cli = new HttpClient()) {
                         int i = 0;

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -35,8 +35,8 @@ namespace LogicLink.Corona {
         private readonly DateTime REPRODUCTION_START = new DateTime(2020, 3, 6); 
         */
 
-        private Progress _pgr = new Progress();
-        private System.Timers.Timer _tmr = new System.Timers.Timer(250);
+        private readonly Progress _pgr = new Progress();
+        private readonly DispatcherTimer _tmr = new();
         private bool _bUpdateReproduction = false;                          // True, if basic reproduction numbers (R₀) should be re-calculated
         private bool _bUpdateVaccination = false;                           // True, if vaccinations should be re-calculated
         private bool _bUpdateDailyVaccination = true;                       // True, if the number of daily vaccinated people should be re-calculated from the last 7 days
@@ -46,6 +46,7 @@ namespace LogicLink.Corona {
         private Dictionary<DateTime, double> _dicVaccinated;                // Dictionary of vaccinates individuals per day
 
         private bool _bUpdating = false;
+        private readonly SynchronizationContext _uiContext;
 
         private async Task UpdateReproductionAsync(WorkbenchViewModel vm) {
             _bUpdateReproduction = false;
@@ -132,8 +133,11 @@ namespace LogicLink.Corona {
                     _pgr.Report(100);
 
                 } catch(Exception ex) {
-                    MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
+                    _uiContext.Send(_ =>
+                    {
+                        MessageBox.Show($"Basic reproduction numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        Close();
+                    }, null);
                 }
             } else
                 _dicReproduction = null;
@@ -182,8 +186,11 @@ namespace LogicLink.Corona {
                 }
                 _pgr.Report(100);
             } catch(Exception ex) {
-                MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Vaccination numbers calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
 
             if(bResetUpdating)
@@ -222,7 +229,6 @@ namespace LogicLink.Corona {
             cht.ChartAreas[0].AxisY2.MinorTickMark.Enabled = true;
             cht.ChartAreas[0].AxisY2.MinorTickMark.Interval = .1d;
             cht.ChartAreas[0].AxisY2.MinorTickMark.LineColor = Color.LightGray;
-
         }
 
         private async Task UpdateChartAsync(WorkbenchViewModel vm) {
@@ -257,12 +263,15 @@ namespace LogicLink.Corona {
                     try {
                         await vJhu.CalcAsync(vm.Start, vm.End, pgrJhu);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the JHU data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowConfirmed = false;
-                        vm.ShowDailyConfirmed = false;
-                        vm.Show7DaysConfirmed = false;
-                        vm.ShowRecovered = false;
-                        vm.ShowDeaths = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the JHU data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowConfirmed = false;
+                            vm.ShowDailyConfirmed = false;
+                            vm.Show7DaysConfirmed = false;
+                            vm.ShowRecovered = false;
+                            vm.ShowDeaths = false;
+                        }, null);
                     }
                     pgrJhu.Changed -= _pgr_Changed;
                 }
@@ -276,9 +285,12 @@ namespace LogicLink.Corona {
                     try {
                         await vOwid.CalcAsync(vm.Start, vm.End, pgrOwd);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the OWID data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowConfirmedVaccinated = false;
-                        vm.ShowDailyConfirmedVaccinated = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the OWID data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowConfirmedVaccinated = false;
+                            vm.ShowDailyConfirmedVaccinated = false;
+                        }, null);
                     }
                     pgrOwd.Changed -= _pgr_Changed;
                 }
@@ -292,46 +304,59 @@ namespace LogicLink.Corona {
                     try {
                         await vRnc.CalcAsync(vm.Start, vm.End, pgrRnc);
                     } catch(Exception ex) {
-                        MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                        vm.ShowNowcasting7Day = false;
+                        _uiContext.Send(_ =>
+                        {
+                            MessageBox.Show($"Chart updating error because of an error in the RKI Nowcasting data file\n\n{ex.GetMostInnerException().Message}\n\nPlease check the file format.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            vm.ShowNowcasting7Day = false;
+                        }, null);
                     }
                     pgrRnc.Changed -= _pgr_Changed;
                 }
 
-                // 5. Update Title
-                cht.Titles[0].Text = vm.Country;
+                _uiContext.Send(_ =>
+                {
+                    // 5. Update Title
+                    cht.Titles[0].Text = vm.Country;
 
-                // 6. Add strip lines for weekend
-                cht.ChartAreas[0].AxisX.StripLines.Clear();
-                cht.ChartAreas[0].AxisX.StripLines.Add(new StripLine { IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
-                                                                       Interval = 7,
-                                                                       StripWidth = 2,
-                                                                       BackColor = Color.FromArgb(247, 247, 247) });
+                    // 6. Add strip lines for weekend
+                    cht.ChartAreas[0].AxisX.StripLines.Clear();
+                    cht.ChartAreas[0].AxisX.StripLines.Add(
+                        new StripLine 
+                        { 
+                            IntervalOffset = -0.5d - (int)vm.Start.DayOfWeek,
+                            Interval = 7,
+                            StripWidth = 2,
+                            BackColor = Color.FromArgb(247, 247, 247)
+                        });
 
-                // 7. Show available series
-                cht.Series.Clear();
-                _pgr.Report(95);
-                cht.Series.Add(vSeir);
-                _pgr.Report(96);
-                cht.Series.Add(vJhu);
-                _pgr.Report(97);
-                cht.Series.Add(vOwid);
-                _pgr.Report(98);
-                cht.Series.Add(vRnc);
-                _pgr.Report(99);
+                    // 7. Show available series
+                    cht.Series.Clear();
+                    _pgr.Report(95);
+                    cht.Series.Add(vSeir);
+                    _pgr.Report(96);
+                    cht.Series.Add(vJhu);
+                    _pgr.Report(97);
+                    cht.Series.Add(vOwid);
+                    _pgr.Report(98);
+                    cht.Series.Add(vRnc);
+                    _pgr.Report(99);
 
-                cht.ChartAreas[0].RecalculateAxesScale();
+                    cht.ChartAreas[0].RecalculateAxesScale();
 
-                _pgr.Report(100);
+                    _pgr.Report(100);
 
-                // 8. Add Legend
-                cht.Legends.Clear();
-                cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
-            
-                _pgr.Report(100, "Ready", false);
+                    // 8. Add Legend
+                    cht.Legends.Clear();
+                    cht.Legends.Add(new Legend("Corona SEIR") { Font = cht.ChartAreas[0].AxisX.TitleFont });
+                
+                    _pgr.Report(100, "Ready", false);
+                }, null);
             } catch(Exception ex) {
-                MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Chart updating error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
 
             if(bResetUpdating)
@@ -350,8 +375,11 @@ namespace LogicLink.Corona {
             try {
                 vm.Population = await new WPPopulation().GetDataAsync(vm.Country, vm.Start.Year);
             } catch(Exception ex) {
-                MessageBox.Show($"World Bank population data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"World Bank population data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
             }
         }
 
@@ -374,10 +402,13 @@ namespace LogicLink.Corona {
 
         public Workbench() {
             InitializeComponent();
+            _uiContext = SynchronizationContext.Current;
+            
             this.Title = $"{this.Title} {Assembly.GetExecutingAssembly().GetName().Version}";
 
             _pgr.Changed += _pgr_Changed;
-            _tmr.Elapsed += _tmr_Elapsed;
+            _tmr.Interval = TimeSpan.FromMilliseconds(250);
+            _tmr.Tick += _tmr_Elapsed;
             cht.PostPaint += cht_PostPaint;
             cht.GetToolTipText += cht_GetToolTipText;
         }
@@ -386,53 +417,83 @@ namespace LogicLink.Corona {
 
         #region Window Events
 
-        private void Workbench_Loaded(object sender, RoutedEventArgs e) {
-            if(!(this.DataContext is WorkbenchViewModel vm)) return;
-
-            // Initialize view model
-            vm.Load();                                  // Load Settings
-            vm.PropertyChanged += vm_PropertyChanged;
-
-            // Initialize Johns Hopkins University data
-            Dispatcher.BeginInvoke((Action)(async () => {
-                try {
-                    await new JHU().LoadAsync();
-                } catch(Exception ex) {
-                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
-                try {
-                    await new OWID().LoadAsync();
-                } catch(Exception ex) {
-                    MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
-        }), DispatcherPriority.Background);
+        private void Workbench_Loaded(object sender, RoutedEventArgs e) 
+        {
+            if (this.DataContext is not WorkbenchViewModel vm)
+            {
+                return;
+            }
 
             InitChart();
-            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(vm.SolveR0 || vm.SolveR0Interval)
-                                                                                            await UpdateReproductionAsync(vm);
-                                                                                         await UpdateVaccinationAsync(vm);
-                                                                                         await UpdateChartAsync(vm); 
-                                                                                        }));
+            Task.Run(async () => { await InitializeAsync(vm); });
+        }
+
+        private async Task InitializeAsync(WorkbenchViewModel viewModel)
+        {
+            viewModel.Load(); // Load Settings
+
+            // Initialize Johns Hopkins University data
+            try
+            {
+                await new JHU().LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Johns-Hopkins-University CSSE loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
+            }
+            try
+            {
+                await new OWID().LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Our World In Data loading error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
+            }
+            
+            try
+            {
+                await UpdateReproductionAsync(viewModel);
+                await UpdateVaccinationAsync(viewModel);
+                await UpdateChartAsync(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _uiContext.Send(_ =>
+                {
+                    MessageBox.Show($"Calculation error\n\n{ex.GetMostInnerException().Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }, null);
+            }
+
+            viewModel.PropertyChanged += vm_PropertyChanged;
         }
 
         #endregion
 
         #region Control Events
 
-        private void _pgr_Changed(object sender, ValueEventArgs<(int Progress, string Message, bool Show)> e) {
-            pbr.Value = e.Value.Progress;
+        private void _pgr_Changed(object sender, ValueEventArgs<(int Progress, string Message, bool Show)> e) 
+        {
+            _uiContext.Send(_ =>
+            {
+                pbr.Value = e.Value.Progress;
 
-            if(e.Value.Message != default)
-                sbi.Content = e.Value.Message;
+                if (e.Value.Message != default)
+                    sbi.Content = e.Value.Message;
 
-            if(e.Value.Show && pbr.Visibility != Visibility.Visible)
-                pbr.Visibility = Visibility.Visible;
-            else if(!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
-                pbr.Visibility = Visibility.Collapsed;
-            
-            pbr.Dispatcher.Invoke(delegate () { }, DispatcherPriority.Render);
+                if (e.Value.Show && pbr.Visibility != Visibility.Visible)
+                    pbr.Visibility = Visibility.Visible;
+                else if (!e.Value.Show && pbr.Visibility != Visibility.Collapsed)
+                    pbr.Visibility = Visibility.Collapsed;
+            }, null);
         }
 
         private void btnData_Click(object sender, RoutedEventArgs e) => new Data(cht.ToDataTable()).ShowDialog();
@@ -610,49 +671,60 @@ namespace LogicLink.Corona {
         #endregion
 
         #region Timer Events
-        
-        private void _tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-            if(!_bUpdating) {
+
+        private void _tmr_Elapsed(object sender, EventArgs e) 
+        {
+            if (DataContext is not WorkbenchViewModel viewModel)
+            {
+                return;
+            }
+
+            if (!_bUpdating) 
+            {
                 _bUpdating = true;
                 _tmr.Stop();
-                Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { if(_bUpdateReproduction)
-                                                                                                await UpdateReproductionAsync(this.DataContext as WorkbenchViewModel);
-                                                                                             if(_bUpdateVaccination)
-                                                                                                await UpdateVaccinationAsync(this.DataContext as WorkbenchViewModel);
-                                                                                             await UpdateChartAsync(this.DataContext as WorkbenchViewModel); 
-                                                                                             _bUpdating = false;
-                                                                                           }));
+
+                Task.Run(async () => { await UpdateAsync(viewModel); });
             }
+        }
+
+        private async Task UpdateAsync(WorkbenchViewModel viewModel)
+        {
+            if (_bUpdateReproduction)
+            {
+                await UpdateReproductionAsync(viewModel);
+            }
+
+            if (_bUpdateVaccination)
+            {
+                await UpdateVaccinationAsync(viewModel);
+            }
+
+            await UpdateChartAsync(viewModel);
+
+            _bUpdating = false;
         }
 
         #endregion
 
         #region ViewModel Events
 
-        private void vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            if(!(sender is WorkbenchViewModel vm)) return;
+        private void vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) 
+        {
+            if (sender is not WorkbenchViewModel vm)
+            {
+                return;
+            }
 
             switch(e.PropertyName) {
                 case nameof(WorkbenchViewModel.Country):
                     _bUpdating = true;
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdatePopulationAsync(vm); 
-                                                                                                 await UpdateInfectiousAsync(vm);
-                                                                                                 _bUpdating = false;
-                                                                                                 _bUpdateReproduction = true;
-                                                                                                 _bUpdateDailyVaccination = true;
-                                                                                                 _bUpdateVaccination = true;
-                                                                                                 _bManualVaccination = false;
-                                                                                                 _tmr.Start();
-                                                                                               }));
+                    Task.Run(async () => { await HandleCountryChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.Start):
                     _bUpdating = true;
-                    Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(async () => { await UpdateInfectiousAsync(vm);
-                                                                                                 _bUpdating = false;
-                                                                                                 _bUpdateReproduction = true;
-                                                                                                 _tmr.Start();
-                                                                                               }));
+                    Task.Run(async () => { await HandleStartDateChangeAsync(vm); });
                     break;
 
                 case nameof(WorkbenchViewModel.End):
@@ -697,6 +769,28 @@ namespace LogicLink.Corona {
                     _tmr.Start();
                     break;
             }
+        }
+
+        private async Task HandleStartDateChangeAsync(WorkbenchViewModel vm)
+        {
+            await UpdateInfectiousAsync(vm);
+            _bUpdating = false;
+            _bUpdateReproduction = true;
+
+            _tmr.Start();
+        }
+
+        private async Task HandleCountryChangeAsync(WorkbenchViewModel vm)
+        {
+            await UpdatePopulationAsync(vm);
+            await UpdateInfectiousAsync(vm);
+            _bUpdating = false;
+            _bUpdateReproduction = true;
+            _bUpdateDailyVaccination = true;
+            _bUpdateVaccination = true;
+            _bManualVaccination = false;
+
+            _tmr.Start();
         }
 
         #endregion
